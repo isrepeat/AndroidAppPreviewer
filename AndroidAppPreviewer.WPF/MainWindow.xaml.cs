@@ -72,6 +72,9 @@ public partial class MainWindow : Window {
     private string? scenarioFileText => this.scenarioController.PersistedText;
 
     private bool IsNativePluginAvailable => this.pluginSessionController.IsAvailable;
+    private bool IsPluginSelectionLocked => Array.Exists(
+        Environment.GetCommandLineArgs(),
+        argument => string.Equals(argument, "--plugin", StringComparison.OrdinalIgnoreCase));
     private NativePreviewSession? nativeApplicationSession => this.previewController.Session;
     private bool isMarkupDirty => this.documentEditorController.IsDirty;
     private string? markupPath => this.documentEditorController.Path;
@@ -173,6 +176,7 @@ public partial class MainWindow : Window {
     }
 
     private void InitializeLoadedWindow() {
+        this.UpdatePluginSelectionAvailability();
         var pluginPath = this.GetConfiguredPluginPath();
         if (pluginPath is null) {
             pluginPath = this.pluginSessionController.PickPlugin(this);
@@ -230,6 +234,13 @@ public partial class MainWindow : Window {
             return this.settings.PreviewPluginPath;
         }
         return null;
+    }
+
+    private void UpdatePluginSelectionAvailability() {
+        this.SelectPreviewPluginButton.IsEnabled = !this.IsPluginSelectionLocked;
+        this.SelectPreviewPluginButton.ToolTip = this.IsPluginSelectionLocked
+            ? "Приложение закреплено параметром --plugin для текущего сеанса отладки."
+            : null;
     }
 
     private void UpdateNativePluginTitle() {
@@ -466,6 +477,9 @@ public partial class MainWindow : Window {
     }
 
     private void SelectPreviewPluginButtonClick(object sender, RoutedEventArgs eventArgs) {
+        if (this.IsPluginSelectionLocked) {
+            return;
+        }
         var pluginPath = this.pluginSessionController.PickPlugin(this);
         if (pluginPath is null) {
             return;

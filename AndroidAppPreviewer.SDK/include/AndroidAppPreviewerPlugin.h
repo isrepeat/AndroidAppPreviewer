@@ -2,9 +2,9 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-#define XAML_PREVIEWER_PLUGIN_API __declspec(dllexport)
+#define ANDROID_APP_PREVIEWER_PLUGIN_API __declspec(dllexport)
 #else
-#define XAML_PREVIEWER_PLUGIN_API
+#define ANDROID_APP_PREVIEWER_PLUGIN_API
 #endif
 
 #ifdef __cplusplus
@@ -17,15 +17,15 @@ enum {
 
 // All strings crossing this ABI are UTF-8 and copied into caller-owned buffers.
 // The opaque session belongs to the plugin that created it.
-XAML_PREVIEWER_PLUGIN_API uint32_t xp_get_abi_version(void);
-XAML_PREVIEWER_PLUGIN_API const char* xp_get_last_error(void);
+ANDROID_APP_PREVIEWER_PLUGIN_API uint32_t xp_get_abi_version(void);
+ANDROID_APP_PREVIEWER_PLUGIN_API const char* xp_get_last_error(void);
 // Returns JSON containing applicationId, displayName, resourceRootRelativePath,
 // sourceMarkupDirectory, sourceEntryMarkupPath and sourceControlsDirectory.
 // Source paths are absolute and required by the desktop editor.
-XAML_PREVIEWER_PLUGIN_API int xp_get_plugin_info(char* pluginInfoJson, int capacity);
-XAML_PREVIEWER_PLUGIN_API int xp_get_initial_page_id(void* session, char* pageId, int capacity);
-XAML_PREVIEWER_PLUGIN_API int xp_get_navigation_graph(void* session, char* graphJson, int capacity);
-XAML_PREVIEWER_PLUGIN_API int xp_navigate(void* session, const char* transitionIds);
+ANDROID_APP_PREVIEWER_PLUGIN_API int xp_get_plugin_info(char* pluginInfoJson, int capacity);
+ANDROID_APP_PREVIEWER_PLUGIN_API int xp_get_initial_page_id(void* session, char* pageId, int capacity);
+ANDROID_APP_PREVIEWER_PLUGIN_API int xp_get_navigation_graph(void* session, char* graphJson, int capacity);
+ANDROID_APP_PREVIEWER_PLUGIN_API int xp_navigate(void* session, const char* transitionIds);
 
 #ifdef __cplusplus
 }

@@ -829,7 +829,8 @@
                     Click="OpenButtonClick"
                     Content="Открыть"
                     Visibility="Collapsed" />
-            <Button Width="145"
+            <Button x:Name="SelectPreviewPluginButton"
+                    Width="145"
                     Margin="0 0 8 0"
                     Click="SelectPreviewPluginButtonClick"
                     Content="Выбрать приложение" />
