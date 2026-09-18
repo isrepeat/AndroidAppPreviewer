@@ -99,6 +99,8 @@ public partial class MainWindow : Window {
         this.statusPresenter = new PreviewStatusPresenter(this.StatusText);
         this.navigationGraphController = new NavigationGraphController(
             this.NavigationGraph,
+            this.NavigationBranchPanel,
+            this.NavigationBranchPanelScrollViewer,
             this.statusPresenter.Information);
         this.pluginSessionController = new PluginSessionController();
         this.previewController = new PreviewController(this.Dispatcher, this.pluginSessionController);
@@ -107,17 +109,7 @@ public partial class MainWindow : Window {
             Interval = TimeSpan.FromMilliseconds(300),
         };
         this.windowSizePersistenceTimer.Tick += this.WindowSizePersistenceTimerTick;
-        this.windowLayoutController = new WindowLayoutController(
-            this.EditorColumn,
-            this.WorkspaceColumn,
-            this.EditorNavigationSplitterColumn,
-            this.NavigationGraphColumn,
-            this.NavigationPreviewSplitterColumn,
-            this.PreviewColumn,
-            this.EditorNavigationSplitter,
-            this.NavigationGraphPanel,
-            this.NavigationPreviewSplitter,
-            (GridLength)this.FindResource("PanelSplitterWidth"));
+        this.windowLayoutController = new WindowLayoutController(this.EditorColumn, this.WorkspaceColumn);
         this.previewController.RenderRequested += () => this.ShowNativeApplicationPreview();
         this.previewController.FrameUpdated += this.PreviewFrameUpdated;
         this.previewController.Failed += this.ShowPreviewError;
@@ -514,7 +506,7 @@ public partial class MainWindow : Window {
         }
 
         this.settings.IsNavigationGraphVisible = this.NavigationGraphToggleButton.IsChecked == true;
-        this.UpdateNavigationGraphVisibility(true);
+        this.UpdateNavigationGraphVisibility();
         this.SyncSettingsEditor();
         this.PersistSettings();
     }
@@ -1134,9 +1126,6 @@ public partial class MainWindow : Window {
         }
         this.settings.IsMaximized = this.WindowState == WindowState.Maximized;
         this.settings.EditorPaneRatio = this.GetEditorPaneRatio();
-        if (this.settings.IsNavigationGraphVisible && this.NavigationGraphColumn.ActualWidth > 0.0) {
-            this.settings.NavigationGraphPaneWidth = this.windowLayoutController.GetNavigationGraphPaneWidth();
-        }
         this.settingsController.Save();
         // Синхронизируем отображаемый JSON после собственного сохранения.
         // Тогда settingsWatcher не принимает нашу же запись за внешнее
@@ -1265,10 +1254,6 @@ public partial class MainWindow : Window {
         this.PersistSettings();
     }
 
-    private void NavigationGraphSplitterDragCompleted(object sender, DragCompletedEventArgs eventArgs) {
-        this.PersistSettings();
-    }
-
     private void UpdateEditorMode() {
         this.MarkupEditor.Visibility = this.editorMode == EditorMode.Xaml ? Visibility.Visible : Visibility.Collapsed;
         this.ScenarioPanel.Visibility = this.editorMode == EditorMode.Scenario ? Visibility.Visible : Visibility.Collapsed;
@@ -1276,6 +1261,7 @@ public partial class MainWindow : Window {
         this.OpenButton.IsEnabled = this.editorMode == EditorMode.Xaml;
         this.UpdateScenarioToggle();
         this.UpdateDocumentState();
+        this.UpdateNavigationGraphVisibility();
         this.UpdateElementInspection();
     }
 
@@ -1328,8 +1314,12 @@ public partial class MainWindow : Window {
         this.ApplyPreviewLayout();
     }
 
-    private void UpdateNavigationGraphVisibility(bool animate = false) {
-        this.windowLayoutController.UpdateNavigationGraph(this.settings, animate);
+    private void UpdateNavigationGraphVisibility() {
+        var isVisible = this.settings.IsNavigationGraphVisible;
+        this.NavigationGraphPanel.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+        if (this.editorMode == EditorMode.Xaml) {
+            this.MarkupEditor.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+        }
     }
 
     private double GetEditorPaneRatio() {
@@ -1440,7 +1430,7 @@ public partial class MainWindow : Window {
         // У страницы может не быть сценариев. Это не причина пересоздавать
         // native-сессию: новая сессия всегда начинает с MainPage и отменяет
         // только что завершённую навигацию.
-        this.ScenarioButton.Visibility = Visibility.Collapsed;
+        this.ScenarioButton.Visibility = Visibility.Visible;
         this.ScenarioButton.IsChecked = false;
         if (this.editorMode == EditorMode.Scenario) {
             this.editorMode = EditorMode.Xaml;

@@ -74,9 +74,7 @@ internal sealed class PluginSessionController : IDisposable {
     }
 
     private PreviewPluginInfo ReadPluginInfo() {
-        var buffer = new StringBuilder(4096);
-        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_get_plugin_info(buffer, buffer.Capacity) != 0);
-        using var document = JsonDocument.Parse(buffer.ToString());
+        using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.GetPluginInfo());
         var root = document.RootElement;
         var applicationId = root.GetProperty("applicationId").GetString();
         var displayName = root.GetProperty("displayName").GetString();

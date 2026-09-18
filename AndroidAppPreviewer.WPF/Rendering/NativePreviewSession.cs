@@ -280,21 +280,15 @@ internal sealed class NativePreviewSession : IDisposable {
     }
 
     private string GetCurrentPage() {
-        var page = new StringBuilder(128);
-        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_current_page(this.session, page, page.Capacity) != 0);
-        return page.ToString();
+        return AndroidAppPreviewerPluginSDK.NativeRuntime.GetSessionCurrentPage(this.session);
     }
 
     private string GetInitialPage() {
-        var page = new StringBuilder(128);
-        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_get_initial_page_id(this.session, page, page.Capacity) != 0);
-        return page.ToString();
+        return AndroidAppPreviewerPluginSDK.NativeRuntime.GetInitialPageId(this.session);
     }
 
     private PreviewNavigationGraph GetNavigationGraph() {
-        var graph = new StringBuilder(16384);
-        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_get_navigation_graph(this.session, graph, graph.Capacity) != 0);
-        using var document = JsonDocument.Parse(graph.ToString());
+        using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.GetNavigationGraph(this.session));
         var root = document.RootElement;
         var titles = root.GetProperty("pages")
             .EnumerateArray()

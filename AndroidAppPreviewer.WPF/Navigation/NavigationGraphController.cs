@@ -3,59 +3,60 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using ShapePath = System.Windows.Shapes.Path;
 using Polygon = System.Windows.Shapes.Polygon;
-using Polyline = System.Windows.Shapes.Polyline;
 
 namespace AndroidAppPreviewer;
 
 internal sealed class NavigationGraphController {
-    private sealed record GraphEdge(string First, string Second) {
-        public static GraphEdge FromRoute(PreviewRoute route) {
-            return string.CompareOrdinal(route.Source, route.Target) <= 0
-                ? new GraphEdge(route.Source, route.Target)
-                : new GraphEdge(route.Target, route.Source);
-        }
-
-        public bool Connects(string source, string target) {
-            return (this.First == source && this.Second == target)
-                || (this.First == target && this.Second == source);
-        }
-    }
-
-    private const double CardWidth = 172.0;
-    private const double CardHeight = 78.0;
-    private const double LayerSpacing = 120.0;
+    private const double CardWidth = 176.0;
+    private const double CardHeight = 74.0;
+    private const double LayerSpacing = 154.0;
+    private const double GraphHorizontalPadding = 48.0;
     private readonly Canvas graph;
+    private readonly StackPanel branchPanel;
+    private readonly ScrollViewer branchPanelScrollViewer;
     private readonly Action<string> reportInformation;
+    private readonly Dictionary<string, IReadOnlyList<string>> lastPathByTarget = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Button> nodes = [];
-    private readonly Dictionary<GraphEdge, Polyline> edges = [];
+    private readonly Dictionary<string, RouteSlot> routeSlots = new(StringComparer.Ordinal);
     private IReadOnlyList<PreviewRoute> routes = [];
     private IReadOnlyDictionary<string, string> pageTitles = new Dictionary<string, string>(StringComparer.Ordinal);
     private IReadOnlyList<PreviewRoute> selectedPath = [];
     private IReadOnlyList<IReadOnlyList<PreviewRoute>> pathCandidates = [];
     private string? selectedTarget;
     private string? currentPage;
+    private string? layoutRootPage;
 
     public event Action<string>? ActivePageChanged;
     public event Action<IReadOnlyList<string>>? RouteConfirmed;
 
-    public NavigationGraphController(Canvas graph, Action<string> reportInformation) {
+    public NavigationGraphController(
+        Canvas graph,
+        StackPanel branchPanel,
+        ScrollViewer branchPanelScrollViewer,
+        Action<string> reportInformation) {
         this.graph = graph;
+        this.branchPanel = branchPanel;
+        this.branchPanelScrollViewer = branchPanelScrollViewer;
         this.reportInformation = reportInformation;
     }
 
     public void SetRoutes(
         IReadOnlyList<PreviewRoute> routes,
         IReadOnlyDictionary<string, string> pageTitles,
-        string currentPage) {
+        string currentPage,
+        string layoutRootPage) {
         this.routes = routes;
         this.pageTitles = pageTitles;
+        this.layoutRootPage = layoutRootPage;
+        this.lastPathByTarget.Clear();
         this.ResetSelection();
         this.Synchronize(currentPage, true);
     }
 
     public void SetGraph(PreviewNavigationGraph graph) {
-        this.SetRoutes(graph.Routes, graph.PageTitles, graph.CurrentPageId);
+        this.SetRoutes(graph.Routes, graph.PageTitles, graph.CurrentPageId, graph.LayoutRootPageId);
     }
 
     public void Synchronize(string currentPage, bool force = false) {
@@ -83,19 +84,33 @@ internal sealed class NavigationGraphController {
         this.routes = [];
         this.pageTitles = new Dictionary<string, string>(StringComparer.Ordinal);
         this.currentPage = null;
+        this.layoutRootPage = null;
+        this.lastPathByTarget.Clear();
         this.ResetSelection();
         this.graph.Children.Clear();
+        this.branchPanel.Children.Clear();
+        this.branchPanelScrollViewer.Visibility = Visibility.Collapsed;
     }
 
-    private void NavigationNodeClick(object sender, RoutedEventArgs eventArgs) {
+    private void NavigationNodeMouseLeftButtonDown(object sender, MouseButtonEventArgs eventArgs) {
         if (sender is not Button { Tag: string target } || this.currentPage is null) {
             return;
         }
-        if (string.Equals(this.selectedTarget, target, StringComparison.Ordinal)
+        if (eventArgs.ClickCount == 2
+            && string.Equals(target, this.selectedTarget, StringComparison.Ordinal)
             && this.selectedPath.Count > 0) {
             var transitionIds = this.selectedPath.Select(route => route.Id).ToArray();
             AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
             this.RouteConfirmed?.Invoke(transitionIds);
+            eventArgs.Handled = true;
+            return;
+        }
+        this.SelectTarget(target);
+        eventArgs.Handled = true;
+    }
+
+    private void SelectTarget(string target) {
+        if (this.currentPage is null) {
             return;
         }
         var paths = this.FindPaths(this.currentPage, target);
@@ -105,7 +120,10 @@ internal sealed class NavigationGraphController {
         }
         this.selectedTarget = target;
         this.pathCandidates = paths;
-        this.selectedPath = paths[0];
+        var previous = this.lastPathByTarget.GetValueOrDefault(target);
+        this.selectedPath = previous is null
+            ? paths[0]
+            : paths.FirstOrDefault(candidate => candidate.Select(route => route.Id).SequenceEqual(previous)) ?? paths[0];
         AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath.Select(route => route.Id))}; candidates={paths.Count}");
         this.Render();
     }
@@ -137,24 +155,9 @@ internal sealed class NavigationGraphController {
             .ToArray();
     }
 
-    private void NavigationEdgeClick(object sender, MouseButtonEventArgs eventArgs) {
-        if (sender is not Polyline { Tag: GraphEdge edge } || this.selectedTarget is null) {
-            return;
-        }
-        var paths = this.pathCandidates.Where(candidate => this.ContainsEdge(candidate, edge)).ToArray();
-        if (paths.Length == 0) {
-            return;
-        }
-        var currentIndex = Array.FindIndex(paths, candidate => candidate.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id)));
-        this.selectedPath = paths[(currentIndex + 1) % paths.Length];
-        this.Render();
-        eventArgs.Handled = true;
-    }
-
     private void Render() {
         this.graph.Children.Clear();
         this.nodes.Clear();
-        this.edges.Clear();
         var pages = this.routes
             .SelectMany(route => new[] { route.Source, route.Target })
             .Distinct()
@@ -163,29 +166,16 @@ internal sealed class NavigationGraphController {
         if (pages.Length == 0) {
             return;
         }
-        var positions = this.CalculateNodePositions(pages);
-        var graphEdges = this.routes.Select(GraphEdge.FromRoute).Distinct().ToArray();
-        foreach (var edge in graphEdges) {
-            var (source, target) = this.GetEdgeEndpoints(edge, positions);
-            var points = this.CreateRoutePoints(new PreviewRoute(string.Empty, source, target, string.Empty, true, "page"), positions);
-            var selectedRoute = this.GetSelectedRoute(edge);
-            var stroke = selectedRoute is not null
-                ? new SolidColorBrush(Color.FromRgb(239, 191, 65))
-                : new SolidColorBrush(Color.FromRgb(91, 91, 91));
-            var line = new Polyline {
-                Points = new PointCollection(points),
-                StrokeThickness = selectedRoute is null ? 1.5 : 3.0,
-                Stroke = stroke,
-                Tag = edge,
-                Cursor = Cursors.Hand,
-            };
-            line.MouseLeftButtonDown += this.NavigationEdgeClick;
-            this.edges.Add(edge, line);
-            this.graph.Children.Add(line);
-            if (selectedRoute is not null) {
-                var arrowPoints = selectedRoute.Source == source ? points : points.Reverse().ToArray();
-                this.graph.Children.Add(this.CreateRouteArrow(arrowPoints, stroke));
-            }
+        var graphWidth = this.CalculateGraphWidth(pages);
+        var positions = this.CalculateNodePositions(pages, graphWidth);
+        this.graph.Width = graphWidth;
+        this.graph.Height = Math.Max(480.0, positions.Values.Max(point => point.Y) + CardHeight + 56.0);
+        var routeGroups = this.routes
+            .GroupBy(route => PagePair.Create(route.Source, route.Target))
+            .ToArray();
+        this.AssignRouteSlots(routeGroups, positions);
+        foreach (var group in routeGroups) {
+            this.DrawRouteGroup(group.Key, group.ToArray(), positions);
         }
         foreach (var page in pages) {
             var position = positions[page];
@@ -204,14 +194,16 @@ internal sealed class NavigationGraphController {
                 FontSize = 17,
                 FontWeight = FontWeights.SemiBold,
                 Template = CreateNavigationNodeTemplate(),
-                ToolTip = isTarget ? "Повторный клик запустит выбранный маршрут" : "Выбрать маршрут к странице",
+                ToolTip = "Один клик выбирает маршрут; двойной клик подтверждает переход.",
             };
-            button.Click += this.NavigationNodeClick;
+            button.PreviewMouseLeftButtonDown += this.NavigationNodeMouseLeftButtonDown;
             Canvas.SetLeft(button, position.X);
             Canvas.SetTop(button, position.Y);
             this.nodes.Add(page, button);
             this.graph.Children.Add(button);
         }
+        this.RenderBranchPanel();
+        this.UpdateStatus();
     }
 
     private static ControlTemplate CreateNavigationNodeTemplate() {
@@ -250,95 +242,181 @@ internal sealed class NavigationGraphController {
         this.selectedTarget = null;
     }
 
-    private PreviewRoute? GetSelectedRoute(GraphEdge edge) {
-        foreach (var route in this.selectedPath) {
-            if (edge.Connects(route.Source, route.Target)) {
-                return route;
+    private double CalculateGraphWidth(IReadOnlyList<string> pages) {
+        var largestLayer = this.GetPageDepths(pages)
+            .GroupBy(pair => pair.Value)
+            .Max(layer => layer.Count());
+        return Math.Max(760.0, largestLayer * CardWidth + (largestLayer + 1) * GraphHorizontalPadding);
+    }
+
+    private Dictionary<string, Point> CalculateNodePositions(IReadOnlyList<string> pages, double width) {
+        var depths = this.GetPageDepths(pages);
+        var result = new Dictionary<string, Point>(StringComparer.Ordinal);
+        foreach (var layer in pages.GroupBy(page => depths[page]).OrderBy(group => group.Key)) {
+            var items = layer.OrderBy(this.PageTitle, StringComparer.Ordinal).ToArray();
+            var gap = (width - items.Length * CardWidth) / (items.Length + 1);
+            for (var index = 0; index < items.Length; ++index) {
+                result.Add(items[index], new Point(gap + index * (CardWidth + gap), 34.0 + layer.Key * LayerSpacing));
             }
         }
-        return null;
+        return result;
     }
 
-    private (string Source, string Target) GetEdgeEndpoints(
-        GraphEdge edge,
-        IReadOnlyDictionary<string, Point> positions) {
-        return positions[edge.First].Y <= positions[edge.Second].Y
-            ? (edge.First, edge.Second)
-            : (edge.Second, edge.First);
-    }
-
-    private Dictionary<string, Point> CalculateNodePositions(IReadOnlyList<string> pages) {
-        var root = pages.Contains("MainPage", StringComparer.Ordinal) ? "MainPage" : pages[0];
-        var depths = new Dictionary<string, int> { [root] = 0 };
+    private Dictionary<string, int> GetPageDepths(IReadOnlyList<string> pages) {
+        var root = this.layoutRootPage is not null && pages.Contains(this.layoutRootPage, StringComparer.Ordinal)
+            ? this.layoutRootPage
+            : pages.Contains("MainPage", StringComparer.Ordinal) ? "MainPage" : pages[0];
+        var depths = new Dictionary<string, int>(StringComparer.Ordinal) { [root] = 0 };
         for (var depth = 0; depth < pages.Count; ++depth) {
-            foreach (var edge in this.routes.Where(edge => depths.TryGetValue(edge.Source, out var sourceDepth) && sourceDepth == depth)) {
-                if (!depths.ContainsKey(edge.Target)) {
-                    depths.Add(edge.Target, depth + 1);
+            foreach (var route in this.routes.Where(route => depths.TryGetValue(route.Source, out var sourceDepth) && sourceDepth == depth)) {
+                if (!depths.ContainsKey(route.Target)) {
+                    depths.Add(route.Target, depth + 1);
                 }
             }
         }
         foreach (var page in pages.Where(page => !depths.ContainsKey(page))) {
             depths.Add(page, depths.Values.DefaultIfEmpty().Max() + 1);
         }
-        var availableWidth = Math.Max(this.graph.ActualWidth, 410.0);
-        var result = new Dictionary<string, Point>();
-        foreach (var layer in pages.GroupBy(page => depths[page]).OrderBy(group => group.Key)) {
-            var items = layer.Order().ToArray();
-            var gap = (availableWidth - CardWidth * items.Length) / (items.Length + 1);
-            for (var index = 0; index < items.Length; ++index) {
-                result.Add(items[index], new Point(gap + index * (CardWidth + gap), 18 + layer.Key * LayerSpacing));
+        return depths;
+    }
+
+    private void DrawRouteGroup(PagePair pair, IReadOnlyList<PreviewRoute> routes, IReadOnlyDictionary<string, Point> positions) {
+        var (firstPage, secondPage) = this.GetOrderedEndpoints(pair, positions);
+        var forwardRoutes = routes.Where(route => route.Source == firstPage && route.Target == secondPage).ToArray();
+        var backwardRoutes = routes.Where(route => route.Source == secondPage && route.Target == firstPage).ToArray();
+        var visibleRoutes = this.GetVisibleRoutes(firstPage, secondPage, routes);
+        var selectedBackwardRoute = backwardRoutes.FirstOrDefault(route => this.selectedPath.Any(item => item.Id == route.Id));
+        for (var index = 0; index < visibleRoutes.Count; ++index) {
+            var route = visibleRoutes[index];
+            var connection = this.CreateConnectionGeometry(
+                positions[firstPage],
+                positions[secondPage],
+                this.routeSlots[route.Id]);
+            var isSelectedRoute = this.selectedPath.Any(item => item.Id == route.Id);
+            var isSelectedBackwardRoute = forwardRoutes.Length > 0 && selectedBackwardRoute is not null && index == 0;
+            var isSelected = isSelectedRoute || isSelectedBackwardRoute;
+            var isPotential = this.IsPotentialRoute(route);
+            var brush = isSelected ? Brushes.Gold : isPotential ? Brushes.SlateGray : Brushes.DimGray;
+            var opacity = this.selectedTarget is null || isPotential || isSelectedBackwardRoute ? 1.0 : 0.22;
+            this.graph.Children.Add(new ShapePath {
+                Data = connection.Data,
+                Stroke = brush,
+                StrokeThickness = isSelected ? 4.0 : isPotential ? 2.0 : 1.5,
+                Opacity = opacity,
+                IsHitTestVisible = false,
+            });
+            if (isSelectedRoute) {
+                var isForward = route.Source == firstPage;
+                var arrowTip = isForward ? connection.SecondPoint : connection.FirstPoint;
+                var arrowTail = isForward ? connection.SecondPreviousPoint : connection.FirstNextPoint;
+                this.graph.Children.Add(this.CreateRouteArrow(arrowTip, arrowTail, brush, opacity));
+                this.graph.Children.Add(this.CreateRouteStepBadge(arrowTip, arrowTail, this.GetPathStep(route.Id)));
+            }
+            if (isSelectedBackwardRoute && selectedBackwardRoute is not null) {
+                this.graph.Children.Add(this.CreateRouteArrow(connection.FirstPoint, connection.FirstNextPoint, brush, opacity));
+                this.graph.Children.Add(this.CreateRouteStepBadge(
+                    connection.FirstPoint,
+                    connection.FirstNextPoint,
+                    this.GetPathStep(selectedBackwardRoute.Id)));
             }
         }
-        var deepestLayer = depths.Values.DefaultIfEmpty().Max();
-        this.graph.Height = Math.Max(500.0, 36.0 + CardHeight + deepestLayer * LayerSpacing);
-        return result;
     }
 
-    private IReadOnlyList<Point> CreateRoutePoints(PreviewRoute route, IReadOnlyDictionary<string, Point> positions) {
-        var source = positions[route.Source];
-        var target = positions[route.Target];
-        if (this.UsesLayerCorridor(source, target)) {
-            var corridorY = (source.Y + CardHeight + target.Y) / 2.0;
-            return [
-                new Point(source.X + CardWidth / 2.0, source.Y + CardHeight),
-                new Point(source.X + CardWidth / 2.0, corridorY),
-                new Point(target.X + CardWidth / 2.0, corridorY),
-                new Point(target.X + CardWidth / 2.0, target.Y),
-            ];
+    private void AssignRouteSlots(
+        IReadOnlyList<IGrouping<PagePair, PreviewRoute>> routeGroups,
+        IReadOnlyDictionary<string, Point> positions) {
+        this.routeSlots.Clear();
+        var routedRoutes = routeGroups
+            .SelectMany(group => {
+                var (firstPage, secondPage) = this.GetOrderedEndpoints(group.Key, positions);
+                return this.GetVisibleRoutes(firstPage, secondPage, group.ToArray())
+                    .Select(route => new RoutedRoute(route, this.GetRouteLaneKey(positions[firstPage], positions[secondPage], group.Key)));
+            })
+            .ToArray();
+        foreach (var lane in routedRoutes.GroupBy(route => route.LaneKey)) {
+            var routes = lane.OrderBy(route => route.Route.Id, StringComparer.Ordinal).ToArray();
+            for (var index = 0; index < routes.Length; ++index) {
+                this.routeSlots.Add(routes[index].Route.Id, new RouteSlot(index, routes.Length));
+            }
         }
-        var goesLeft = this.RouteGoesLeft(route, source, target);
-        var laneIndex = this.GetSideLaneIndex(route, positions, goesLeft);
-        var graphWidth = Math.Max(this.graph.ActualWidth, 410.0);
-        var laneX = goesLeft ? 18.0 + laneIndex * 14.0 : graphWidth - 18.0 - laneIndex * 14.0;
-        var sourcePort = new Point(goesLeft ? source.X : source.X + CardWidth, source.Y + CardHeight / 2.0);
-        var targetPort = new Point(goesLeft ? target.X : target.X + CardWidth, target.Y + CardHeight / 2.0);
-        return [sourcePort, new Point(laneX, sourcePort.Y), new Point(laneX, targetPort.Y), targetPort];
     }
 
-    private bool UsesLayerCorridor(Point source, Point target) {
-        return target.Y > source.Y && target.Y - source.Y <= LayerSpacing + 0.01;
-    }
-
-    private bool RouteGoesLeft(PreviewRoute route, Point source, Point target) {
-        var sourceCenter = source.X + CardWidth / 2.0;
-        var targetCenter = target.X + CardWidth / 2.0;
-        if (Math.Abs(sourceCenter - targetCenter) > 0.01) {
-            return targetCenter < sourceCenter;
+    private IReadOnlyList<PreviewRoute> GetVisibleRoutes(string firstPage, string secondPage, IReadOnlyList<PreviewRoute> routes) {
+        var forwardRoutes = routes.Where(route => route.Source == firstPage && route.Target == secondPage).ToArray();
+        if (forwardRoutes.Length > 0) {
+            return forwardRoutes;
         }
-        return string.CompareOrdinal(route.Source, route.Target) > 0;
+        return [routes.Single(route => route.Source == secondPage && route.Target == firstPage)];
     }
 
-    private int GetSideLaneIndex(PreviewRoute route, IReadOnlyDictionary<string, Point> positions, bool goesLeft) {
-        return this.routes
-            .Where(candidate => !this.UsesLayerCorridor(positions[candidate.Source], positions[candidate.Target]))
-            .Where(candidate => this.RouteGoesLeft(candidate, positions[candidate.Source], positions[candidate.Target]) == goesLeft)
-            .TakeWhile(candidate => candidate != route)
-            .Count();
+    private string GetRouteLaneKey(Point first, Point second, PagePair pair) {
+        if (Math.Abs(second.Y - first.Y) > 0.01) {
+            return $"vertical:{first.Y}:{second.Y}";
+        }
+        var distance = Math.Abs(second.X - first.X);
+        return distance <= CardWidth + GraphHorizontalPadding * 1.5
+            ? $"direct:{pair.FirstPage}:{pair.SecondPage}"
+            : $"bypass:{first.Y}";
     }
 
-    private Polygon CreateRouteArrow(IReadOnlyList<Point> points, Brush fill) {
-        var tip = points[^1];
-        var tail = points[^2];
+    private ConnectionGeometry CreateConnectionGeometry(Point first, Point second, RouteSlot routeSlot) {
+        var firstCenter = new Point(first.X + CardWidth / 2.0, first.Y + CardHeight / 2.0);
+        var secondCenter = new Point(second.X + CardWidth / 2.0, second.Y + CardHeight / 2.0);
+        var portOffset = (routeSlot.Index + 1.0) / (routeSlot.Count + 1.0);
+        if (Math.Abs(secondCenter.Y - firstCenter.Y) > 0.01) {
+            var firstPoint = new Point(first.X + CardWidth * portOffset, first.Y + CardHeight);
+            var secondPoint = new Point(second.X + CardWidth * portOffset, second.Y);
+            var laneY = firstPoint.Y + (secondPoint.Y - firstPoint.Y) * portOffset;
+            return this.CreateOrthogonalConnection([
+                firstPoint,
+                new Point(firstPoint.X, laneY),
+                new Point(secondPoint.X, laneY),
+                secondPoint,
+            ]);
+        }
+        var horizontalDistance = Math.Abs(secondCenter.X - firstCenter.X);
+        if (horizontalDistance <= CardWidth + GraphHorizontalPadding * 1.5) {
+            return this.CreateOrthogonalConnection([
+                new Point(first.X + CardWidth, first.Y + CardHeight * portOffset),
+                new Point(second.X, second.Y + CardHeight * portOffset),
+            ]);
+        }
+        var firstBottom = new Point(first.X + CardWidth * portOffset, first.Y + CardHeight);
+        var secondBottom = new Point(second.X + CardWidth * portOffset, second.Y + CardHeight);
+        var bypassLaneY = Math.Max(firstBottom.Y, secondBottom.Y) + 20.0 + routeSlot.Index * 12.0;
+        return this.CreateOrthogonalConnection([
+            firstBottom,
+            new Point(firstBottom.X, bypassLaneY),
+            new Point(secondBottom.X, bypassLaneY),
+            secondBottom,
+        ]);
+    }
+
+    private ConnectionGeometry CreateOrthogonalConnection(IReadOnlyList<Point> points) {
+        var routePoints = points.Where((point, index) => index == 0 || point != points[index - 1]).ToArray();
+        var segments = routePoints.Skip(1).Select(point => (PathSegment)new LineSegment(point, true)).ToArray();
+        return new ConnectionGeometry(
+            new PathGeometry([new PathFigure(routePoints[0], segments, false)]),
+            routePoints[0],
+            routePoints[1],
+            routePoints[^2],
+            routePoints[^1]);
+    }
+
+    private bool IsPotentialRoute(PreviewRoute route) {
+        return this.pathCandidates.Any(path => path.Any(item => item.Id == route.Id));
+    }
+
+    private (string FirstPage, string SecondPage) GetOrderedEndpoints(PagePair pair, IReadOnlyDictionary<string, Point> positions) {
+        var first = positions[pair.FirstPage];
+        var second = positions[pair.SecondPage];
+        if (first.Y < second.Y || (Math.Abs(first.Y - second.Y) < 0.01 && first.X <= second.X)) {
+            return (pair.FirstPage, pair.SecondPage);
+        }
+        return (pair.SecondPage, pair.FirstPage);
+    }
+
+    private Polygon CreateRouteArrow(Point tip, Point tail, Brush fill, double opacity) {
         var direction = tip - tail;
         direction.Normalize();
         var normal = new Vector(-direction.Y, direction.X);
@@ -349,20 +427,118 @@ internal sealed class NavigationGraphController {
                 tip - direction * 11.0 - normal * 5.0,
             },
             Fill = fill,
+            Opacity = opacity,
             IsHitTestVisible = false,
         };
+    }
+
+    private Border CreateRouteStepBadge(Point tip, Point tail, int step) {
+        var direction = tip - tail;
+        var isVertical = Math.Abs(direction.Y) >= Math.Abs(direction.X);
+        var badge = new Border {
+            Width = 20.0,
+            Height = 20.0,
+            Background = new SolidColorBrush(Color.FromRgb(78, 65, 28)),
+            BorderBrush = Brushes.Gold,
+            BorderThickness = new Thickness(1.0),
+            Child = new TextBlock {
+                Text = step.ToString(),
+                FontSize = 11.0,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            },
+            IsHitTestVisible = false,
+        };
+        Canvas.SetLeft(badge, isVertical ? tip.X + 8.0 : tip.X - 10.0);
+        Canvas.SetTop(badge, isVertical ? tip.Y - 10.0 : tip.Y - 28.0);
+        Panel.SetZIndex(badge, 100);
+        return badge;
+    }
+
+    private int GetPathStep(string routeId) {
+        return this.selectedPath
+            .Select((route, index) => new { route.Id, Step = index + 1 })
+            .Single(item => item.Id == routeId)
+            .Step;
     }
 
     private string PageTitle(string page) {
         return this.pageTitles.GetValueOrDefault(page, page);
     }
 
-    private bool ContainsEdge(IReadOnlyList<PreviewRoute> path, GraphEdge edge) {
-        foreach (var route in path) {
-            if (edge.Connects(route.Source, route.Target)) {
-                return true;
-            }
+    private void RenderBranchPanel() {
+        this.branchPanel.Children.Clear();
+        if (this.selectedTarget is null) {
+            this.branchPanelScrollViewer.Visibility = Visibility.Collapsed;
+            return;
         }
-        return false;
+        this.branchPanelScrollViewer.Visibility = Visibility.Visible;
+        for (var index = 0; index < this.pathCandidates.Count; ++index) {
+            var path = this.pathCandidates[index];
+            var isSelected = path.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id));
+            var content = new StackPanel();
+            content.Children.Add(new TextBlock {
+                Text = $"Путь {index + 1}",
+                FontWeight = FontWeights.SemiBold,
+                Foreground = Brushes.White,
+            });
+            foreach (var route in path) {
+                content.Children.Add(new TextBlock {
+                    Margin = new Thickness(0.0, 5.0, 0.0, 0.0),
+                    Text = $"{this.PageTitle(route.Source)}: {route.Title}",
+                    TextWrapping = TextWrapping.Wrap,
+                    Foreground = new SolidColorBrush(Color.FromRgb(218, 218, 218)),
+                });
+            }
+            var card = new Border {
+                Margin = new Thickness(0.0, 0.0, 0.0, 8.0),
+                Padding = new Thickness(10.0),
+                Background = new SolidColorBrush(isSelected ? Color.FromRgb(78, 65, 28) : Color.FromRgb(48, 48, 48)),
+                BorderBrush = new SolidColorBrush(isSelected ? Colors.Gold : Color.FromRgb(92, 92, 92)),
+                BorderThickness = new Thickness(isSelected ? 2.0 : 1.0),
+                Child = content,
+                Cursor = Cursors.Hand,
+                ToolTip = "Выбрать этот сценарий маршрута",
+            };
+            card.MouseLeftButtonDown += (_, eventArgs) => {
+                this.selectedPath = path;
+                this.lastPathByTarget[this.selectedTarget] = path.Select(route => route.Id).ToArray();
+                this.Render();
+                eventArgs.Handled = true;
+            };
+            this.branchPanel.Children.Add(card);
+        }
+    }
+
+    private void UpdateStatus() {
+        if (this.currentPage is null) {
+            return;
+        }
+        if (this.selectedTarget is null) {
+            this.reportInformation($"Активная страница: {this.PageTitle(this.currentPage)}. Выберите страницу, чтобы увидеть пути к ней.");
+            return;
+        }
+        this.reportInformation($"Выбран путь «{string.Join(" → ", this.selectedPath.Select(route => route.Title))}». Выберите другую ветку слева или дважды нажмите целевую страницу.");
+    }
+
+    private sealed record ConnectionGeometry(
+        PathGeometry Data,
+        Point FirstPoint,
+        Point FirstNextPoint,
+        Point SecondPreviousPoint,
+        Point SecondPoint);
+
+    private sealed record RouteSlot(int Index, int Count);
+
+    private sealed record RoutedRoute(PreviewRoute Route, string LaneKey);
+
+    private sealed record PagePair(string FirstPage, string SecondPage) {
+        public static PagePair Create(string sourcePage, string targetPage) {
+            return string.CompareOrdinal(sourcePage, targetPage) <= 0
+                ? new PagePair(sourcePage, targetPage)
+                : new PagePair(targetPage, sourcePage);
+        }
     }
 }
