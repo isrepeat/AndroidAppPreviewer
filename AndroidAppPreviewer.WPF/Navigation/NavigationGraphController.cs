@@ -31,8 +31,8 @@ internal sealed class NavigationGraphController {
     private readonly Dictionary<GraphEdge, Polyline> edges = [];
     private IReadOnlyList<PreviewRoute> routes = [];
     private IReadOnlyDictionary<string, string> pageTitles = new Dictionary<string, string>(StringComparer.Ordinal);
-    private IReadOnlyList<string> selectedPath = [];
-    private IReadOnlyList<IReadOnlyList<string>> pathCandidates = [];
+    private IReadOnlyList<PreviewRoute> selectedPath = [];
+    private IReadOnlyList<IReadOnlyList<PreviewRoute>> pathCandidates = [];
     private string? selectedTarget;
     private string? currentPage;
 
@@ -52,6 +52,10 @@ internal sealed class NavigationGraphController {
         this.pageTitles = pageTitles;
         this.ResetSelection();
         this.Synchronize(currentPage, true);
+    }
+
+    public void SetGraph(PreviewNavigationGraph graph) {
+        this.SetRoutes(graph.Routes, graph.PageTitles, graph.CurrentPageId);
     }
 
     public void Synchronize(string currentPage, bool force = false) {
@@ -89,8 +93,8 @@ internal sealed class NavigationGraphController {
         }
         if (string.Equals(this.selectedTarget, target, StringComparison.Ordinal)
             && this.selectedPath.Count > 0) {
-            var transitionIds = this.GetTransitionIds(this.selectedPath);
-            NativeRuntime.xr_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
+            var transitionIds = this.selectedPath.Select(route => route.Id).ToArray();
+            AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
             this.RouteConfirmed?.Invoke(transitionIds);
             return;
         }
@@ -102,41 +106,35 @@ internal sealed class NavigationGraphController {
         this.selectedTarget = target;
         this.pathCandidates = paths;
         this.selectedPath = paths[0];
-        NativeRuntime.xr_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath)}; candidates={paths.Count}");
+        AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath.Select(route => route.Id))}; candidates={paths.Count}");
         this.Render();
     }
 
-    private IReadOnlyList<IReadOnlyList<string>> FindPaths(string source, string target) {
-        var result = new List<IReadOnlyList<string>>();
-        var path = new List<string> { source };
+    private IReadOnlyList<IReadOnlyList<PreviewRoute>> FindPaths(string source, string target) {
+        var result = new List<IReadOnlyList<PreviewRoute>>();
+        var path = new List<PreviewRoute>();
+        var visited = new HashSet<string>(StringComparer.Ordinal) { source };
         void Visit(string page) {
             if (page == target) {
                 result.Add(path.ToArray());
                 return;
             }
-            foreach (var edge in this.routes.Where(edge => edge.Source == page)) {
-                if (path.Contains(edge.Target, StringComparer.Ordinal)) {
+            foreach (var route in this.routes.Where(route => route.Source == page)) {
+                if (!visited.Add(route.Target)) {
                     continue;
                 }
-                path.Add(edge.Target);
-                Visit(edge.Target);
+                path.Add(route);
+                Visit(route.Target);
                 path.RemoveAt(path.Count - 1);
+                visited.Remove(route.Target);
             }
         }
         Visit(source);
-        return result.OrderBy(path => path.Count).ToArray();
-    }
-
-    private IReadOnlyList<string> GetTransitionIds(IReadOnlyList<string> pagePath) {
-        var transitionIds = new List<string>(pagePath.Count - 1);
-        for (var index = 0; index + 1 < pagePath.Count; ++index) {
-            var transition = this.routes.FirstOrDefault(route => route.Source == pagePath[index] && route.Target == pagePath[index + 1]);
-            if (transition is null) {
-                throw new InvalidOperationException($"Для {pagePath[index]} → {pagePath[index + 1]} нет native transition.");
-            }
-            transitionIds.Add(transition.Id);
-        }
-        return transitionIds;
+        return result
+            .OrderBy(candidate => candidate.Count)
+            .ThenByDescending(candidate => candidate.Count(route => route.IsDefault))
+            .ThenBy(candidate => string.Join('/', candidate.Select(route => route.Id)), StringComparer.Ordinal)
+            .ToArray();
     }
 
     private void NavigationEdgeClick(object sender, MouseButtonEventArgs eventArgs) {
@@ -147,7 +145,7 @@ internal sealed class NavigationGraphController {
         if (paths.Length == 0) {
             return;
         }
-        var currentIndex = Array.FindIndex(paths, candidate => candidate.SequenceEqual(this.selectedPath));
+        var currentIndex = Array.FindIndex(paths, candidate => candidate.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id)));
         this.selectedPath = paths[(currentIndex + 1) % paths.Length];
         this.Render();
         eventArgs.Handled = true;
@@ -169,7 +167,7 @@ internal sealed class NavigationGraphController {
         var graphEdges = this.routes.Select(GraphEdge.FromRoute).Distinct().ToArray();
         foreach (var edge in graphEdges) {
             var (source, target) = this.GetEdgeEndpoints(edge, positions);
-            var points = this.CreateRoutePoints(new PreviewRoute(string.Empty, source, target), positions);
+            var points = this.CreateRoutePoints(new PreviewRoute(string.Empty, source, target, string.Empty, true, "page"), positions);
             var selectedRoute = this.GetSelectedRoute(edge);
             var stroke = selectedRoute is not null
                 ? new SolidColorBrush(Color.FromRgb(239, 191, 65))
@@ -253,11 +251,9 @@ internal sealed class NavigationGraphController {
     }
 
     private PreviewRoute? GetSelectedRoute(GraphEdge edge) {
-        for (var index = 1; index < this.selectedPath.Count; ++index) {
-            var source = this.selectedPath[index - 1];
-            var target = this.selectedPath[index];
-            if (edge.Connects(source, target)) {
-                return new PreviewRoute(string.Empty, source, target);
+        foreach (var route in this.selectedPath) {
+            if (edge.Connects(route.Source, route.Target)) {
+                return route;
             }
         }
         return null;
@@ -361,9 +357,9 @@ internal sealed class NavigationGraphController {
         return this.pageTitles.GetValueOrDefault(page, page);
     }
 
-    private bool ContainsEdge(IReadOnlyList<string> path, GraphEdge edge) {
-        for (var index = 1; index < path.Count; ++index) {
-            if (edge.Connects(path[index - 1], path[index])) {
+    private bool ContainsEdge(IReadOnlyList<PreviewRoute> path, GraphEdge edge) {
+        foreach (var route in path) {
+            if (edge.Connects(route.Source, route.Target)) {
                 return true;
             }
         }

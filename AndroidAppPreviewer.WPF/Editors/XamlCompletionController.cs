@@ -221,18 +221,18 @@ internal sealed class XamlCompletionController {
     }
 
     private static IEnumerable<string> GetAttributes(string elementName) {
-        var count = NativeRuntime.xr_supported_attribute_count(elementName);
+        var count = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_supported_attribute_count(elementName);
         if (count > 0) {
             return Enumerable.Range(0, count)
-                .Select(index => NativeRuntime.GetSupportedAttributeName(elementName, index))
+                .Select(index => AndroidAppPreviewerPluginSDK.NativeRuntime.GetSupportedAttributeName(elementName, index))
                 .Where(name => !string.IsNullOrEmpty(name));
         }
         return [];
     }
 
     private static IEnumerable<string> GetElementNames() {
-        return Enumerable.Range(0, NativeRuntime.xr_supported_element_count())
-            .Select(NativeRuntime.GetSupportedElementName)
+        return Enumerable.Range(0, AndroidAppPreviewerPluginSDK.NativeRuntime.xp_supported_element_count())
+            .Select(AndroidAppPreviewerPluginSDK.NativeRuntime.GetSupportedElementName)
             .Where(name => !string.IsNullOrEmpty(name));
     }
 }

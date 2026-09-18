@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AndroidAppPreviewer.PluginSDK"
+                      Version="*" />
     <Resource Include="Resources\Icons\close.svg" />
     <Resource Include="Resources\Icons\expand-all.svg" />
     <Resource Include="Resources\Icons\find-next.svg" />

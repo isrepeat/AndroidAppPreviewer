@@ -13,19 +13,19 @@ internal sealed class AnglePreviewRenderer : IDisposable {
     public AnglePreviewRenderer(string markupDirectory, int width, int height) {
         this.Width = width;
         this.Height = height;
-        this.surface = NativeRuntime.xr_create_angle_surface(
+        this.surface = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_create_angle_surface(
             this.Width,
             this.Height,
             AnglePreviewRenderer.GetPreviewRendererRegularFontPath(),
             markupDirectory);
-        NativeRuntime.Ensure(this.surface != IntPtr.Zero);
+        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(this.surface != IntPtr.Zero);
     }
 
     public BitmapSource Render(IntPtr root) {
         const int bytesPerPixel = 4;
         var stride = this.Width * bytesPerPixel;
         var pixels = new byte[stride * this.Height];
-        NativeRuntime.Ensure(NativeRuntime.xr_render_angle_surface(
+        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_render_angle_surface(
             this.surface,
             root,
             pixels,
@@ -48,7 +48,7 @@ internal sealed class AnglePreviewRenderer : IDisposable {
         const int bytesPerPixel = 4;
         var stride = this.Width * bytesPerPixel;
         var pixels = new byte[stride * this.Height];
-        NativeRuntime.Ensure(NativeRuntime.mc_render_angle_surface(
+        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_render_angle_surface(
             session,
             this.surface,
             pixels,
@@ -63,7 +63,7 @@ internal sealed class AnglePreviewRenderer : IDisposable {
         if (this.surface == IntPtr.Zero) {
             return;
         }
-        NativeRuntime.xr_destroy_angle_surface(this.surface);
+        AndroidAppPreviewerPluginSDK.NativeRuntime.xp_destroy_angle_surface(this.surface);
         this.surface = IntPtr.Zero;
     }
 

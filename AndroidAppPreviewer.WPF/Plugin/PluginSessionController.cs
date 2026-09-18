@@ -22,15 +22,23 @@ internal sealed class PluginSessionController : IDisposable {
     public string? PluginPath => this.pluginPath;
     public NativePreviewSession? Session => this.session;
 
-    public void Initialize(string? path) {
+    public Exception? Initialize(string? path) {
         if (string.IsNullOrWhiteSpace(path)) {
-            return;
+            return null;
         }
-        NativeRuntime.ConfigurePlugin(path);
-        NativeRuntime.EnsurePluginCompatibility();
-        this.pluginPath = Path.GetFullPath(path);
-        this.Info = this.ReadPluginInfo();
-        NativeRuntime.xr_configure_logging(Path.Combine(AppContext.BaseDirectory, "android-app-previewer.log"));
+        try {
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ConfigurePlugin(path);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.EnsurePluginCompatibility();
+            this.pluginPath = Path.GetFullPath(path);
+            this.Info = this.ReadPluginInfo();
+            AndroidAppPreviewerPluginSDK.NativeRuntime.xp_configure_logging(Path.Combine(AppContext.BaseDirectory, "android-app-previewer.log"));
+            return null;
+        } catch (Exception exception) {
+            this.Reset();
+            this.pluginPath = null;
+            this.Info = null;
+            return exception;
+        }
     }
 
     public NativePreviewSession CreateSession(int width, int height) {
@@ -52,7 +60,7 @@ internal sealed class PluginSessionController : IDisposable {
 
     public void LogInfo(string message) {
         if (this.IsAvailable) {
-            NativeRuntime.xr_log_info(message);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info(message);
         }
     }
 
@@ -67,7 +75,7 @@ internal sealed class PluginSessionController : IDisposable {
 
     private PreviewPluginInfo ReadPluginInfo() {
         var buffer = new StringBuilder(4096);
-        NativeRuntime.Ensure(NativeRuntime.xp_get_plugin_info(buffer, buffer.Capacity) != 0);
+        AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_get_plugin_info(buffer, buffer.Capacity) != 0);
         using var document = JsonDocument.Parse(buffer.ToString());
         var root = document.RootElement;
         var applicationId = root.GetProperty("applicationId").GetString();

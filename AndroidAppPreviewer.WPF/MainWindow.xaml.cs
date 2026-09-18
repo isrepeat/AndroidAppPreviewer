@@ -185,7 +185,15 @@ public partial class MainWindow : Window {
                 this.settingsController.Save();
             }
         }
-        this.pluginSessionController.Initialize(pluginPath);
+        var pluginInitializationError = this.pluginSessionController.Initialize(pluginPath);
+        if (pluginInitializationError is not null) {
+            if (!this.IsPluginSelectionLocked) {
+                this.settings.PreviewPluginPath = string.Empty;
+                this.settingsController.Save();
+            }
+            this.statusPresenter.Error(
+                $"Preview-plugin не загружен: {pluginInitializationError.Message} Выберите DLL, совместимую с текущей версией Previewer-а.");
+        }
         if (this.IsNativePluginAvailable) {
             this.ApplyPluginSourceMarkupDirectory();
         }
@@ -245,7 +253,12 @@ public partial class MainWindow : Window {
 
     private void UpdateNativePluginTitle() {
         var configuredPluginPath = this.pluginSessionController.PluginPath ?? this.GetConfiguredPluginPath();
-        var loadedLibraryPath = configuredPluginPath is null ? string.Empty : Path.GetFullPath(configuredPluginPath);
+        if (configuredPluginPath is null) {
+            this.Title = "Android App Previewer (preview-plugin не выбран)";
+            WindowTheme.SetTitleBarWarning(this, true);
+            return;
+        }
+        var loadedLibraryPath = Path.GetFullPath(configuredPluginPath);
         var loadedLibrary = new FileInfo(loadedLibraryPath);
         if (!loadedLibrary.Exists) {
             this.Title = "Android App Previewer (preview-plugin не найден)";
@@ -601,7 +614,7 @@ public partial class MainWindow : Window {
                         || Keyboard.IsKeyDown(Key.RightAlt))));
     }
 
-    private void PreviewElementSelected(NativeInspectionResult inspection) {
+    private void PreviewElementSelected(AndroidAppPreviewerPluginSDK.NativeInspectionResult inspection) {
         if (string.IsNullOrWhiteSpace(inspection.SourcePath) || !File.Exists(inspection.SourcePath)) {
             return;
         }
@@ -1469,10 +1482,7 @@ public partial class MainWindow : Window {
                 this.previewLayer.Children.Clear();
                 this.previewLayer.Children.Add(this.nativeApplicationSession.Surface);
                 this.ApplyElementInspectionHighlightSettings();
-                this.navigationGraphController.SetRoutes(
-                    this.nativeApplicationSession.PreviewRoutes,
-                    this.nativeApplicationSession.PreviewPageTitles,
-                    this.nativeApplicationSession.CurrentPage);
+                this.navigationGraphController.SetGraph(this.nativeApplicationSession.NavigationGraph);
             }
             var targetPage = this.GetNativeApplicationPageName(this.nativeApplicationSession.InitialPage);
             var shouldLoadTargetPage = isNewSession || shouldLoadSelectedPage;
