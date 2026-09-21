@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -12,19 +12,19 @@ namespace AndroidAppPreviewer {
         public AnglePreviewRenderer(string markupDirectory, int width, int height) {
             this.Width = width;
             this.Height = height;
-            this.surface = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_create_angle_surface(
+            this.surface = AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Rendering.xp_create_angle_surface(
                 this.Width,
                 this.Height,
                 AnglePreviewRenderer.GetPreviewRendererRegularFontPath(),
                 markupDirectory);
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(this.surface != IntPtr.Zero);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(this.surface != IntPtr.Zero);
         }
 
         public BitmapSource Render(IntPtr root) {
             const int bytesPerPixel = 4;
             var stride = this.Width * bytesPerPixel;
             var pixels = new byte[stride * this.Height];
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_render_angle_surface(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Rendering.xp_render_angle_surface(
                 this.surface,
                 root,
                 pixels,
@@ -47,7 +47,7 @@ namespace AndroidAppPreviewer {
             const int bytesPerPixel = 4;
             var stride = this.Width * bytesPerPixel;
             var pixels = new byte[stride * this.Height];
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_render_angle_surface(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_render_angle_surface(
                 session,
                 this.surface,
                 pixels,
@@ -62,7 +62,7 @@ namespace AndroidAppPreviewer {
             if (this.surface == IntPtr.Zero) {
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.xp_destroy_angle_surface(this.surface);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Rendering.xp_destroy_angle_surface(this.surface);
             this.surface = IntPtr.Zero;
         }
 

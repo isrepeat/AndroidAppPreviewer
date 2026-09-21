@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -27,10 +27,10 @@ namespace AndroidAppPreviewer {
             }
             try {
                 AndroidAppPreviewerPluginSDK.NativeRuntime.ConfigurePlugin(path);
-                AndroidAppPreviewerPluginSDK.NativeRuntime.EnsurePluginCompatibility();
+                AndroidAppPreviewerPluginSDK.NativeRuntime.Abi.EnsurePluginCompatibility();
                 this.pluginPath = Path.GetFullPath(path);
                 this.Info = this.ReadPluginInfo();
-                AndroidAppPreviewerPluginSDK.NativeRuntime.xp_configure_logging(Path.Combine(AppContext.BaseDirectory, "android-app-previewer.log"));
+                AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_configure_logging(Path.Combine(AppContext.BaseDirectory, "android-app-previewer.log"));
                 return null;
             } catch (Exception exception) {
                 this.Reset();
@@ -59,7 +59,7 @@ namespace AndroidAppPreviewer {
 
         public void LogInfo(string message) {
             if (this.IsAvailable) {
-                AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info(message);
+                AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info(message);
             }
         }
 
@@ -73,7 +73,7 @@ namespace AndroidAppPreviewer {
         }
 
         private PreviewPluginInfo ReadPluginInfo() {
-            using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.GetPluginInfo());
+            using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.Metadata.GetPluginInfo());
             var root = document.RootElement;
             var applicationId = root.GetProperty("applicationId").GetString();
             var displayName = root.GetProperty("displayName").GetString();

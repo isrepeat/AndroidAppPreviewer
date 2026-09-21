@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -222,18 +222,18 @@ namespace AndroidAppPreviewer {
         }
 
         private static IEnumerable<string> GetAttributes(string elementName) {
-            var count = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_supported_attribute_count(elementName);
+            var count = AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.XamlCompletion.xp_xaml_supported_attribute_count(elementName);
             if (count > 0) {
                 return Enumerable.Range(0, count)
-                    .Select(index => AndroidAppPreviewerPluginSDK.NativeRuntime.GetSupportedAttributeName(elementName, index))
+                    .Select(index => AndroidAppPreviewerPluginSDK.NativeRuntime.XamlCompletion.GetSupportedAttributeName(elementName, index))
                     .Where(name => !string.IsNullOrEmpty(name));
             }
             return [];
         }
 
         private static IEnumerable<string> GetElementNames() {
-            return Enumerable.Range(0, AndroidAppPreviewerPluginSDK.NativeRuntime.xp_supported_element_count())
-                .Select(AndroidAppPreviewerPluginSDK.NativeRuntime.GetSupportedElementName)
+            return Enumerable.Range(0, AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.XamlCompletion.xp_xaml_supported_element_count())
+                .Select(AndroidAppPreviewerPluginSDK.NativeRuntime.XamlCompletion.GetSupportedElementName)
                 .Where(name => !string.IsNullOrEmpty(name));
         }
     }

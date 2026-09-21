@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -42,9 +42,9 @@ namespace AndroidAppPreviewer {
         public NativePreviewSession(string resourcesDirectory, int width, int height) {
             this.renderer = new AnglePreviewRenderer(resourcesDirectory, width, height);
             this.cursorSet = new PreviewCursorSet();
-            this.session = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_create_session(width, height);
+            this.session = AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Interaction.xp_create_session(width, height);
             try {
-                AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(this.session != IntPtr.Zero);
+                AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(this.session != IntPtr.Zero);
                 this.image = new Image {
                     Width = width,
                     Height = height,
@@ -57,7 +57,7 @@ namespace AndroidAppPreviewer {
             }
             catch {
                 if (this.session != IntPtr.Zero) {
-                    AndroidAppPreviewerPluginSDK.NativeRuntime.xp_destroy_session(this.session);
+                    AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Interaction.xp_destroy_session(this.session);
                     this.session = IntPtr.Zero;
                 }
                 this.renderer.Dispose();
@@ -75,7 +75,7 @@ namespace AndroidAppPreviewer {
                 && string.Equals(this.GetCurrentPage(), page, StringComparison.Ordinal)) {
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_load_page(this.session, page) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_load_page(this.session, page) != 0);
             this.loadedPage = page;
 
             this.Render();
@@ -83,20 +83,20 @@ namespace AndroidAppPreviewer {
 
         public string CurrentPage => this.GetCurrentPage();
 
-        public bool IsTransitioning => AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_is_transitioning(this.session) != 0;
+        public bool IsTransitioning => AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_is_transitioning(this.session) != 0;
 
         public PreviewNavigationGraph NavigationGraph => this.GetNavigationGraph();
 
         public void NavigatePreviewRoute(string target) {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_navigate_preview_route(this.session, target) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_navigate_preview_route(this.session, target) != 0);
             this.loadedPage = this.GetCurrentPage();
             this.Render();
         }
 
         public void NavigatePreviewRoute(IReadOnlyList<string> path) {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(path.Count > 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(path.Count > 0);
             var request = JsonSerializer.Serialize(new { transitionIds = path });
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_navigate(this.session, request) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Metadata.xp_navigate(this.session, request) != 0);
             this.loadedPage = this.GetCurrentPage();
             this.Render();
         }
@@ -105,7 +105,7 @@ namespace AndroidAppPreviewer {
             if (this.markups.TryGetValue(sourcePath, out var previous) && previous == markup) {
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_reload_markup(this.session, page, markup, sourcePath) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_reload_markup(this.session, page, markup, sourcePath) != 0);
             if (Path.GetFileNameWithoutExtension(sourcePath) == page) {
                 this.markups.Clear();
             }
@@ -115,7 +115,7 @@ namespace AndroidAppPreviewer {
         }
 
         public void SetAnimationPlaybackRate(double value) {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_set_animation_playback_rate(this.session, (float)value) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_set_animation_playback_rate(this.session, (float)value) != 0);
         }
 
         public void SetElementInspectionEnabled(bool value, bool useDefaultCursor) {
@@ -123,10 +123,10 @@ namespace AndroidAppPreviewer {
             this.useDefaultCursorForElementInspection = value && useDefaultCursor;
             this.image.Cursor = this.useDefaultCursorForElementInspection ? Cursors.Arrow : null;
             if (!value) {
-                AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_clear_inspection_wireframe(this.session) != 0);
+                AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_clear_inspection_wireframe(this.session) != 0);
                 // Закреплённая голубая рамка принадлежит режиму выбора так же, как
                 // временная рамка наведения, поэтому при выходе очищаем обе.
-                AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_clear_selected_inspection_element(this.session) != 0);
+                AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_clear_selected_inspection_element(this.session) != 0);
                 this.Render();
             }
         }
@@ -136,14 +136,14 @@ namespace AndroidAppPreviewer {
             ElementInspectionWireframeSettings active,
             bool renderMargin,
             bool renderPadding) {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_set_inspection_wireframe(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_set_inspection_wireframe(
                 this.session,
                 (float)hovered.LineThickness,
                 hovered.LineStyle == "solid" ? 0 : 1,
                 ParseColor(hovered.LineColor),
                 renderMargin ? ParseColor(hovered.MarginColor) : default,
                 renderPadding ? ParseColor(hovered.PaddingColor) : default) != 0);
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_set_selected_wireframe(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_set_selected_wireframe(
                 this.session,
                 (float)active.LineThickness,
                 active.LineStyle == "solid" ? 0 : 1,
@@ -154,7 +154,7 @@ namespace AndroidAppPreviewer {
         }
 
         public bool SelectElementInspection(string sourcePath, int line, int column) {
-            var isSelected = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_select_inspection_element(this.session, sourcePath, line, column) != 0;
+            var isSelected = AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_select_inspection_element(this.session, sourcePath, line, column) != 0;
             if (isSelected) {
                 this.Render();
             }
@@ -165,20 +165,20 @@ namespace AndroidAppPreviewer {
             if (this.scenarios.TryGetValue(page, out var previous) && previous == json) {
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_apply_preview_scenario(this.session, page, json) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_apply_preview_scenario(this.session, page, json) != 0);
             this.scenarios[page] = json;
             this.Render();
         }
         public bool CanSavePreviewState() {
-            return AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_can_save_preview_state(this.session) != 0;
+            return AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_can_save_preview_state(this.session) != 0;
         }
 
         public void SavePreviewState() {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_export_preview_state(this.session) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_export_preview_state(this.session) != 0);
         }
 
         public void UpdateAndRender() {
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_update(this.session) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_update(this.session) != 0);
             this.loadedPage = this.GetCurrentPage();
             this.Render();
         }
@@ -193,7 +193,7 @@ namespace AndroidAppPreviewer {
                 this.hasPointerCapture = false;
             }
             if (this.session != IntPtr.Zero) {
-                AndroidAppPreviewerPluginSDK.NativeRuntime.xp_destroy_session(this.session);
+                AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Interaction.xp_destroy_session(this.session);
                 this.session = IntPtr.Zero;
             }
 
@@ -205,14 +205,14 @@ namespace AndroidAppPreviewer {
             var point = eventArgs.GetPosition(this.image);
             if (this.isElementInspectionEnabled) {
                 if (this.TryInspect(point, out var inspection)) {
-                    AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_pin_inspection_element(this.session) != 0);
+                    AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_pin_inspection_element(this.session) != 0);
                     this.Render();
                     this.ElementSelected?.Invoke(inspection);
                 }
                 eventArgs.Handled = true;
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_pointer_down(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_pointer_down(
                 this.session,
                 this.ScaleX(point.X),
                 this.ScaleY(point.Y)) != 0);
@@ -231,7 +231,7 @@ namespace AndroidAppPreviewer {
                 return;
             }
             var point = eventArgs.GetPosition(this.image);
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_pointer_up(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_pointer_up(
                 this.session,
                 this.ScaleX(point.X),
                 this.ScaleY(point.Y)) != 0);
@@ -255,7 +255,7 @@ namespace AndroidAppPreviewer {
                 this.SetCursor(this.CursorKind(point));
                 return;
             }
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_pointer_move(
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_pointer_move(
                 this.session,
                 this.ScaleX(point.X),
                 this.ScaleY(point.Y)) != 0);
@@ -264,7 +264,7 @@ namespace AndroidAppPreviewer {
 
         private void ImageMouseLeave(object sender, MouseEventArgs eventArgs) {
             this.image.Cursor = null;
-            AndroidAppPreviewerPluginSDK.NativeRuntime.Ensure(AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_clear_inspection_wireframe(this.session) != 0);
+            AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_clear_inspection_wireframe(this.session) != 0);
             this.Render();
         }
 
@@ -273,21 +273,21 @@ namespace AndroidAppPreviewer {
                 result = default;
                 return false;
             }
-            var isInspected = AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_inspect(this.session, this.ScaleX(point.X), this.ScaleY(point.Y), out result) != 0;
+            var isInspected = AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_inspect(this.session, this.ScaleX(point.X), this.ScaleY(point.Y), out result) != 0;
             this.Render();
             return isInspected;
         }
 
         private string GetCurrentPage() {
-            return AndroidAppPreviewerPluginSDK.NativeRuntime.GetSessionCurrentPage(this.session);
+            return AndroidAppPreviewerPluginSDK.NativeRuntime.Session.GetSessionCurrentPage(this.session);
         }
 
         private string GetInitialPage() {
-            return AndroidAppPreviewerPluginSDK.NativeRuntime.GetInitialPageId(this.session);
+            return AndroidAppPreviewerPluginSDK.NativeRuntime.Metadata.GetInitialPageId(this.session);
         }
 
         private PreviewNavigationGraph GetNavigationGraph() {
-            using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.GetNavigationGraph(this.session));
+            using var document = JsonDocument.Parse(AndroidAppPreviewerPluginSDK.NativeRuntime.Metadata.GetNavigationGraph(this.session));
             var root = document.RootElement;
             var titles = root.GetProperty("pages")
                 .EnumerateArray()
@@ -340,7 +340,7 @@ namespace AndroidAppPreviewer {
             if (this.image.ActualWidth <= 0.0 || this.image.ActualHeight <= 0.0) {
                 return PreviewCursorKind.None;
             }
-            return (PreviewCursorKind)AndroidAppPreviewerPluginSDK.NativeRuntime.xp_session_cursor_kind(
+            return (PreviewCursorKind)AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_cursor_kind(
                 this.session,
                 this.ScaleX(point.X),
                 this.ScaleY(point.Y));

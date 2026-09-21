@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -100,7 +100,7 @@ namespace AndroidAppPreviewer {
                 && string.Equals(target, this.selectedTarget, StringComparison.Ordinal)
                 && this.selectedPath.Count > 0) {
                 var transitionIds = this.selectedPath.Select(route => route.Id).ToArray();
-                AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
+                AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
                 this.RouteConfirmed?.Invoke(transitionIds);
                 eventArgs.Handled = true;
                 return;
@@ -124,7 +124,7 @@ namespace AndroidAppPreviewer {
             this.selectedPath = previous is null
                 ? paths[0]
                 : paths.FirstOrDefault(candidate => candidate.Select(route => route.Id).SequenceEqual(previous)) ?? paths[0];
-            AndroidAppPreviewerPluginSDK.NativeRuntime.xp_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath.Select(route => route.Id))}; candidates={paths.Count}");
+            AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath.Select(route => route.Id))}; candidates={paths.Count}");
             this.Render();
         }
 
