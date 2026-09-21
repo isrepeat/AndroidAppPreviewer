@@ -1,19 +1,21 @@
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Search;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
+using System.Reflection;
+using System.Diagnostics;
+
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Search;
+using ICSharpCode.AvalonEdit.Highlighting;
+
 using PreviewRenderer = AndroidAppPreviewer.PreviewBrushes;
 
 namespace AndroidAppPreviewer;
@@ -1317,9 +1319,14 @@ public partial class MainWindow : Window {
     private void UpdateNavigationGraphVisibility() {
         var isVisible = this.settings.IsNavigationGraphVisible;
         this.NavigationGraphPanel.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-        if (this.editorMode == EditorMode.Xaml) {
-            this.MarkupEditor.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
-        }
+        // Маршрут занимает ту же рабочую область, что XAML, сценарий и настройки.
+        // При закрытии графа восстанавливаем именно ранее выбранный режим редактора.
+        this.MarkupEditor.Visibility = !isVisible && this.editorMode == EditorMode.Xaml
+            ? Visibility.Visible : Visibility.Collapsed;
+        this.ScenarioPanel.Visibility = !isVisible && this.editorMode == EditorMode.Scenario
+            ? Visibility.Visible : Visibility.Collapsed;
+        this.SettingsPanel.Visibility = !isVisible && this.editorMode == EditorMode.Settings
+            ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private double GetEditorPaneRatio() {
