@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -22,12 +21,6 @@ namespace AndroidAppPreviewer {
         string LayoutRootPageId,
         IReadOnlyDictionary<string, string> PageTitles,
         IReadOnlyList<PreviewRoute> Routes);
-
-    internal readonly record struct PreviewFrameTiming(
-        TimeSpan Update,
-        TimeSpan NativeRender,
-        TimeSpan BitmapCreation,
-        TimeSpan ImageAssignment);
 
     // Native application mode. It is intentionally separate from editable-XAML mode:
     // WPF hosts the image and input only; the loaded plugin owns the runtime tree.
@@ -74,7 +67,6 @@ namespace AndroidAppPreviewer {
 
         public int Height => this.renderer.Height;
         public string InitialPage => this.GetInitialPage();
-        public PreviewFrameTiming LastFrameTiming { get; private set; }
         public FrameworkElement Surface => this.image;
         public int Width => this.renderer.Width;
 
@@ -186,16 +178,9 @@ namespace AndroidAppPreviewer {
         }
 
         public void UpdateAndRender() {
-#if DEBUG
-            var updateStarted = Stopwatch.GetTimestamp();
-#endif
             AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_update(this.session) != 0);
             this.loadedPage = this.GetCurrentPage();
-#if DEBUG
-            this.Render(Stopwatch.GetElapsedTime(updateStarted));
-#else
             this.Render();
-#endif
         }
 
         public void Dispose() {
@@ -327,22 +312,8 @@ namespace AndroidAppPreviewer {
                 routes);
         }
 
-        private void Render(TimeSpan updateTime = default) {
-            var bitmap = this.renderer.RenderNativeSession(
-                this.session,
-                out var nativeRenderTime,
-                out var bitmapCreationTime);
-#if DEBUG
-            var imageAssignmentStarted = Stopwatch.GetTimestamp();
-#endif
-            this.image.Source = bitmap;
-#if DEBUG
-            this.LastFrameTiming = new PreviewFrameTiming(
-                updateTime,
-                nativeRenderTime,
-                bitmapCreationTime,
-                Stopwatch.GetElapsedTime(imageAssignmentStarted));
-#endif
+        private void Render() {
+            this.image.Source = this.renderer.RenderNativeSession(this.session);
         }
 
         private static AndroidAppPreviewerPluginSDK.NativeColor ParseColor(string color) {
