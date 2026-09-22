@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -43,18 +44,35 @@ namespace AndroidAppPreviewer {
             return bitmap;
         }
 
-        public BitmapSource RenderNativeSession(IntPtr session) {
+        public BitmapSource RenderNativeSession(
+            IntPtr session,
+            out TimeSpan nativeRenderTime,
+            out TimeSpan bitmapCreationTime) {
             const int bytesPerPixel = 4;
             var stride = this.Width * bytesPerPixel;
             var pixels = new byte[stride * this.Height];
+#if DEBUG
+            var nativeRenderStarted = Stopwatch.GetTimestamp();
+#endif
             AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_render_angle_surface(
                 session,
                 this.surface,
                 pixels,
                 stride,
                 pixels.Length) != 0);
+#if DEBUG
+            nativeRenderTime = Stopwatch.GetElapsedTime(nativeRenderStarted);
+            var bitmapCreationStarted = Stopwatch.GetTimestamp();
+#else
+            nativeRenderTime = TimeSpan.Zero;
+#endif
             var bitmap = BitmapSource.Create(this.Width, this.Height, 96, 96, PixelFormats.Bgra32, null, pixels, stride);
             bitmap.Freeze();
+#if DEBUG
+            bitmapCreationTime = Stopwatch.GetElapsedTime(bitmapCreationStarted);
+#else
+            bitmapCreationTime = TimeSpan.Zero;
+#endif
             return bitmap;
         }
 
