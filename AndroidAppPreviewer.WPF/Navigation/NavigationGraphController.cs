@@ -31,6 +31,8 @@ namespace AndroidAppPreviewer {
         public event Action<string>? ActivePageChanged;
         public event Action<IReadOnlyList<string>>? RouteConfirmed;
 
+        public string? CurrentPage => this.currentPage;
+
         public NavigationGraphController(
             Canvas graph,
             StackPanel branchPanel,

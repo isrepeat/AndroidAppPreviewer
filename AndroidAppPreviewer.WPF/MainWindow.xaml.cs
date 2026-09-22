@@ -494,7 +494,6 @@ namespace AndroidAppPreviewer {
             this.PersistSettings();
             Process.Start(new ProcessStartInfo {
                 FileName = Environment.ProcessPath!,
-                Arguments = $"--plugin \"{pluginPath}\"",
                 WorkingDirectory = AppContext.BaseDirectory,
                 UseShellExecute = true,
             });
@@ -909,11 +908,19 @@ namespace AndroidAppPreviewer {
                 || value.StartsWith("\\\\", StringComparison.Ordinal);
         }
 
+        private void SynchronizeNavigationGraph(NativePreviewSession session) {
+            if (!string.Equals(this.navigationGraphController.CurrentPage, session.CurrentPage, StringComparison.Ordinal)) {
+                // Native graph разрешает previousPage по своей истории. Поэтому после смены
+                // страницы нельзя ограничиться подсветкой узла: нужно получить новый граф.
+                this.navigationGraphController.SetGraph(session.NavigationGraph);
+            }
+        }
+
         private void PreviewFrameUpdated(NativePreviewSession session) {
             if (this.isClosing) {
                 return;
             }
-            this.navigationGraphController.Synchronize(session.CurrentPage);
+            this.SynchronizeNavigationGraph(session);
             if (!session.IsTransitioning && this.deferredNavigationEditorPage is not null) {
                 this.SelectNavigationPageInEditor(this.deferredNavigationEditorPage);
                 this.deferredNavigationEditorPage = null;
@@ -1497,7 +1504,7 @@ namespace AndroidAppPreviewer {
                     this.pluginSessionController.LogInfo($"Preview graph dispatches native route: {string.Join('>', route)}");
                     this.nativeApplicationSession.NavigatePreviewRoute(route);
                     this.pluginSessionController.LogInfo($"Preview graph native route completed: {this.nativeApplicationSession.CurrentPage}");
-                    this.navigationGraphController.CompleteNavigation(this.nativeApplicationSession.CurrentPage);
+                    this.navigationGraphController.SetGraph(this.nativeApplicationSession.NavigationGraph);
                 }
                 this.pendingPreviewRoute = null;
                 var scenario = this.GetSelectedScenarioJson();
@@ -1525,7 +1532,7 @@ namespace AndroidAppPreviewer {
                     }
                 }
                 this.nativeApplicationSession.UpdateAndRender();
-                this.navigationGraphController.Synchronize(this.nativeApplicationSession.CurrentPage);
+                this.SynchronizeNavigationGraph(this.nativeApplicationSession);
                 this.previewController.StartAnimation();
                 this.statusPresenter.Success($"Native app: {this.nativeApplicationSession.CurrentPage}");
             }
