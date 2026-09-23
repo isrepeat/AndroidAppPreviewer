@@ -15,6 +15,7 @@ namespace AndroidAppPreviewer {
         string Title,
         bool IsDefault,
         string TargetKind,
+        string BackwardOfTransitionId,
         string DataType,
         JsonElement PreviewDefault);
 
@@ -306,6 +307,9 @@ namespace AndroidAppPreviewer {
                     transition.GetProperty("title").GetString() ?? throw new InvalidDataException("Transition title is required."),
                     transition.GetProperty("isDefault").GetBoolean(),
                     transition.GetProperty("targetKind").GetString() ?? "page",
+                    transition.TryGetProperty("backwardOfTransitionId", out var backwardOfTransitionId)
+                        ? backwardOfTransitionId.GetString() ?? ""
+                        : "",
                     transition.GetProperty("dataType").GetString() ?? "",
                     transition.GetProperty("previewDefault").Clone()))
                 .ToArray();

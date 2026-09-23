@@ -288,6 +288,7 @@ namespace AndroidAppPreviewer {
             var backwardRoutes = routes.Where(route => route.Source == secondPage && route.Target == firstPage).ToArray();
             var visibleRoutes = this.GetVisibleRoutes(firstPage, secondPage, routes);
             var selectedBackwardRoute = backwardRoutes.FirstOrDefault(route => this.selectedPath.Any(item => item.Id == route.Id));
+            var selectedBackwardOfRouteId = selectedBackwardRoute?.BackwardOfTransitionId;
             for (var index = 0; index < visibleRoutes.Count; ++index) {
                 var route = visibleRoutes[index];
                 var connection = this.CreateConnectionGeometry(
@@ -295,7 +296,8 @@ namespace AndroidAppPreviewer {
                     positions[secondPage],
                     this.routeSlots[route.Id]);
                 var isSelectedRoute = this.selectedPath.Any(item => item.Id == route.Id);
-                var isSelectedBackwardRoute = forwardRoutes.Length > 0 && selectedBackwardRoute is not null && index == 0;
+                var isSelectedBackwardRoute = selectedBackwardRoute is not null
+                    && string.Equals(route.Id, selectedBackwardOfRouteId, StringComparison.Ordinal);
                 var isSelected = isSelectedRoute || isSelectedBackwardRoute;
                 var isPotential = this.IsPotentialRoute(route);
                 var brush = isSelected ? Brushes.Gold : isPotential ? Brushes.SlateGray : Brushes.DimGray;
