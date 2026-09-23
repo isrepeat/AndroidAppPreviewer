@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -99,9 +99,7 @@ namespace AndroidAppPreviewer {
             InitializeComponent();
             this.statusPresenter = new PreviewStatusPresenter(this.StatusText);
             this.navigationGraphController = new NavigationGraphController(
-                this.NavigationGraph,
-                this.NavigationBranchPanel,
-                this.NavigationBranchPanelScrollViewer,
+                this.NavigationGraphControl,
                 this.statusPresenter.Information);
             this.pluginSessionController = new PluginSessionController();
             this.previewController = new PreviewController(this.Dispatcher, this.pluginSessionController);

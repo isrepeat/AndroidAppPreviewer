@@ -15,7 +15,6 @@
         Состояние, загрузка файлов и обработчики событий находятся в MainWindow.xaml.cs.
     -->
     <Window.Resources>
-        <GridLength x:Key="PanelSplitterWidth">12</GridLength>
         <!-- Общие ресурсы темы используются и стандартными WPF-контролами, и AvalonEdit. -->
         <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
                          Color="#242424" />
@@ -905,7 +904,7 @@
                 <ColumnDefinition x:Name="EditorColumn"
                                   Width="1.15*" />
                 <ColumnDefinition x:Name="EditorNavigationSplitterColumn"
-                                  Width="{StaticResource PanelSplitterWidth}" />
+                                  Width="Auto" />
                 <ColumnDefinition x:Name="WorkspaceColumn"
                                   Width="1*" />
             </Grid.ColumnDefinitions>
@@ -932,26 +931,8 @@
                     <TextBlock Margin="10 8"
                                Foreground="#DDDDDD"
                                Text="Маршрут приложения" />
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="260" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <ScrollViewer x:Name="NavigationBranchPanelScrollViewer"
-                                      Margin="8"
-                                      HorizontalScrollBarVisibility="Disabled"
-                                      VerticalScrollBarVisibility="Auto">
-                            <StackPanel x:Name="NavigationBranchPanel"
-                                        Orientation="Vertical" />
-                        </ScrollViewer>
-                        <Viewbox Grid.Column="1"
-                                 Stretch="Uniform">
-                            <Canvas x:Name="NavigationGraph"
-                                    MinWidth="760"
-                                    MinHeight="480"
-                                    Background="#292929" />
-                        </Viewbox>
-                    </Grid>
+                    <local:NavigationGraphControl x:Name="NavigationGraphControl"
+                                                  Grid.Row="1" />
                 </Grid>
             </Border>
             <Button x:Name="ExpandAllFoldingsButton"
@@ -1064,11 +1045,11 @@
                             Content="Выбрать" />
                 </StackPanel>
             </Grid>
-            <GridSplitter x:Name="EditorNavigationSplitter"
-                          Grid.Column="1"
-                          HorizontalAlignment="Stretch"
-                          Background="#333333"
-                          DragCompleted="EditorSplitterDragCompleted" />
+            <local:HorizontalSplitter x:Name="EditorNavigationSplitter"
+                                      Grid.Column="1"
+                                      ThumbWidth="12"
+                                      Background="#333333"
+                                      DragCompleted="EditorSplitterDragCompleted" />
             <Grid Grid.Column="2">
                 <Grid x:Name="PreviewPanel"
                       Margin="10">

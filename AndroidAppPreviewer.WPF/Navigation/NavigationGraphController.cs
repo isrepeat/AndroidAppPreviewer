@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
@@ -11,12 +10,12 @@ namespace AndroidAppPreviewer {
     internal sealed class NavigationGraphController {
         private const double CardWidth = 176.0;
         private const double CardHeight = 74.0;
+        private const double CardHorizontalSpacing = 48.0;
         private const double LayerSpacing = 154.0;
-        private const double GraphHorizontalPadding = 48.0;
         private readonly Canvas graph;
-        private readonly StackPanel branchPanel;
-        private readonly ScrollViewer branchPanelScrollViewer;
+        private readonly NavigationGraphControl navigationGraphControl;
         private readonly Action<string> reportInformation;
+        // Для каждой цели хранится последний выбранный вариант, чтобы возврат к узлу не сбрасывал ветку.
         private readonly Dictionary<string, IReadOnlyList<string>> lastPathByTarget = new(StringComparer.Ordinal);
         private readonly Dictionary<string, Button> nodes = [];
         private readonly Dictionary<string, RouteSlot> routeSlots = new(StringComparer.Ordinal);
@@ -24,6 +23,8 @@ namespace AndroidAppPreviewer {
         private IReadOnlyDictionary<string, string> pageTitles = new Dictionary<string, string>(StringComparer.Ordinal);
         private IReadOnlyList<PreviewRoute> selectedPath = [];
         private IReadOnlyList<IReadOnlyList<PreviewRoute>> pathCandidates = [];
+        // Это множество используется только для пунктирных продолжений после выбранной цели.
+        private IReadOnlySet<string> reachablePagesFromSelectedTarget = new HashSet<string>(StringComparer.Ordinal);
         private string? selectedTarget;
         private string? currentPage;
         private string? layoutRootPage;
@@ -34,14 +35,13 @@ namespace AndroidAppPreviewer {
         public string? CurrentPage => this.currentPage;
 
         public NavigationGraphController(
-            Canvas graph,
-            StackPanel branchPanel,
-            ScrollViewer branchPanelScrollViewer,
+            NavigationGraphControl navigationGraphControl,
             Action<string> reportInformation) {
-            this.graph = graph;
-            this.branchPanel = branchPanel;
-            this.branchPanelScrollViewer = branchPanelScrollViewer;
+            this.navigationGraphControl = navigationGraphControl;
+            this.graph = navigationGraphControl.Graph;
             this.reportInformation = reportInformation;
+            navigationGraphControl.GraphBackgroundPressed += this.GraphBackgroundPressed;
+            navigationGraphControl.PathCandidatePressed += this.PathCandidatePressed;
         }
 
         public void SetRoutes(
@@ -90,8 +90,7 @@ namespace AndroidAppPreviewer {
             this.lastPathByTarget.Clear();
             this.ResetSelection();
             this.graph.Children.Clear();
-            this.branchPanel.Children.Clear();
-            this.branchPanelScrollViewer.Visibility = Visibility.Collapsed;
+            this.navigationGraphControl.SetPathCandidates([]);
         }
 
         private void NavigationNodeMouseLeftButtonDown(object sender, MouseButtonEventArgs eventArgs) {
@@ -101,9 +100,7 @@ namespace AndroidAppPreviewer {
             if (eventArgs.ClickCount == 2
                 && string.Equals(target, this.selectedTarget, StringComparison.Ordinal)
                 && this.selectedPath.Count > 0) {
-                var transitionIds = this.selectedPath.Select(route => route.Id).ToArray();
-                AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
-                this.RouteConfirmed?.Invoke(transitionIds);
+                this.ConfirmSelectedPath();
                 eventArgs.Handled = true;
                 return;
             }
@@ -111,8 +108,22 @@ namespace AndroidAppPreviewer {
             eventArgs.Handled = true;
         }
 
+        private void GraphBackgroundPressed() {
+            if (this.selectedTarget is null) {
+                return;
+            }
+            // Узлы помечают событие обработанным, поэтому сюда попадает только клик по свободному фону.
+            this.ResetSelection();
+            this.Render();
+        }
+
         private void SelectTarget(string target) {
             if (this.currentPage is null) {
+                return;
+            }
+            if (string.Equals(target, this.currentPage, StringComparison.Ordinal)) {
+                this.ResetSelection();
+                this.Render();
                 return;
             }
             var paths = this.FindPaths(this.currentPage, target);
@@ -122,10 +133,15 @@ namespace AndroidAppPreviewer {
             }
             this.selectedTarget = target;
             this.pathCandidates = paths;
+            this.reachablePagesFromSelectedTarget = this.FindReachablePages(target);
+            // При выборе следующей цели продолжаем уже выбранную ветку, если она к ней ведёт.
+            var continuation = this.FindPathWithLongestCommonPrefix(paths, this.selectedPath);
             var previous = this.lastPathByTarget.GetValueOrDefault(target);
-            this.selectedPath = previous is null
-                ? paths[0]
-                : paths.FirstOrDefault(candidate => candidate.Select(route => route.Id).SequenceEqual(previous)) ?? paths[0];
+            this.selectedPath = continuation
+                ?? (previous is null
+                    ? paths[0]
+                    : paths.FirstOrDefault(candidate => candidate.Select(route => route.Id).SequenceEqual(previous)) ?? paths[0]);
+            this.lastPathByTarget[target] = this.selectedPath.Select(route => route.Id).ToArray();
             AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info($"Preview graph selected route: {string.Join('>', this.selectedPath.Select(route => route.Id))}; candidates={paths.Count}");
             this.Render();
         }
@@ -157,6 +173,25 @@ namespace AndroidAppPreviewer {
                 .ToArray();
         }
 
+        private IReadOnlyList<PreviewRoute>? FindPathWithLongestCommonPrefix(
+            IReadOnlyList<IReadOnlyList<PreviewRoute>> candidates,
+            IReadOnlyList<PreviewRoute> previousPath) {
+            if (previousPath.Count == 0) {
+                return null;
+            }
+            var candidate = candidates
+                .Select(candidate => new {
+                    Path = candidate,
+                    CommonPrefixLength = candidate
+                        .Zip(previousPath)
+                        .TakeWhile(pair => string.Equals(pair.First.Id, pair.Second.Id, StringComparison.Ordinal))
+                        .Count(),
+                })
+                .OrderByDescending(item => item.CommonPrefixLength)
+                .First();
+            return candidate.CommonPrefixLength == 0 ? null : candidate.Path;
+        }
+
         private void Render() {
             this.graph.Children.Clear();
             this.nodes.Clear();
@@ -171,7 +206,7 @@ namespace AndroidAppPreviewer {
             var graphWidth = this.CalculateGraphWidth(pages);
             var positions = this.CalculateNodePositions(pages, graphWidth);
             this.graph.Width = graphWidth;
-            this.graph.Height = Math.Max(480.0, positions.Values.Max(point => point.Y) + CardHeight + 56.0);
+            this.graph.Height = Math.Max(this.graph.MinHeight, positions.Values.Max(point => point.Y) + CardHeight + 56.0);
             var routeGroups = this.routes
                 .GroupBy(route => PagePair.Create(route.Source, route.Target))
                 .ToArray();
@@ -195,7 +230,7 @@ namespace AndroidAppPreviewer {
                     Foreground = new SolidColorBrush(Color.FromRgb(242, 242, 242)),
                     FontSize = 17,
                     FontWeight = FontWeights.SemiBold,
-                    Template = CreateNavigationNodeTemplate(),
+                    Template = this.navigationGraphControl.NavigationNodeButtonTemplate,
                     ToolTip = "Один клик выбирает маршрут; двойной клик подтверждает переход.",
                 };
                 button.PreviewMouseLeftButtonDown += this.NavigationNodeMouseLeftButtonDown;
@@ -208,39 +243,10 @@ namespace AndroidAppPreviewer {
             this.UpdateStatus();
         }
 
-        private static ControlTemplate CreateNavigationNodeTemplate() {
-            var template = new ControlTemplate(typeof(Button));
-            var border = new FrameworkElementFactory(typeof(Border));
-            border.Name = "Border";
-            border.SetBinding(Border.BackgroundProperty, CreateTemplateBinding(Control.BackgroundProperty));
-            border.SetBinding(Border.BorderBrushProperty, CreateTemplateBinding(Control.BorderBrushProperty));
-            border.SetBinding(Border.BorderThicknessProperty, CreateTemplateBinding(Control.BorderThicknessProperty));
-            var content = new FrameworkElementFactory(typeof(ContentPresenter));
-            content.SetBinding(ContentPresenter.ContentProperty, CreateTemplateBinding(ContentControl.ContentProperty));
-            content.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            content.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
-            border.AppendChild(content);
-            template.VisualTree = border;
-
-            var hoverTrigger = new Trigger {
-                Property = UIElement.IsMouseOverProperty,
-                Value = true,
-            };
-            hoverTrigger.Setters.Add(new Setter(Border.BorderBrushProperty, new SolidColorBrush(Color.FromRgb(239, 191, 65)), "Border"));
-            hoverTrigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(2), "Border"));
-            template.Triggers.Add(hoverTrigger);
-            return template;
-        }
-
-        private static Binding CreateTemplateBinding(DependencyProperty property) {
-            return new Binding {
-                Path = new PropertyPath(property),
-                RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent),
-            };
-        }
         private void ResetSelection() {
             this.selectedPath = [];
             this.pathCandidates = [];
+            this.reachablePagesFromSelectedTarget = new HashSet<string>(StringComparer.Ordinal);
             this.selectedTarget = null;
         }
 
@@ -248,7 +254,7 @@ namespace AndroidAppPreviewer {
             var largestLayer = this.GetPageDepths(pages)
                 .GroupBy(pair => pair.Value)
                 .Max(layer => layer.Count());
-            return Math.Max(760.0, largestLayer * CardWidth + (largestLayer + 1) * GraphHorizontalPadding);
+            return Math.Max(this.graph.MinWidth, largestLayer * CardWidth + (largestLayer + 1) * CardHorizontalSpacing);
         }
 
         private Dictionary<string, Point> CalculateNodePositions(IReadOnlyList<string> pages, double width) {
@@ -300,12 +306,14 @@ namespace AndroidAppPreviewer {
                     && string.Equals(route.Id, selectedBackwardOfRouteId, StringComparison.Ordinal);
                 var isSelected = isSelectedRoute || isSelectedBackwardRoute;
                 var isPotential = this.IsPotentialRoute(route);
-                var brush = isSelected ? Brushes.Gold : isPotential ? Brushes.SlateGray : Brushes.DimGray;
-                var opacity = this.selectedTarget is null || isPotential || isSelectedBackwardRoute ? 1.0 : 0.22;
+                var isReachableFromSelectedTarget = !isSelected && !isPotential && this.IsReachableFromSelectedTarget(route);
+                var brush = isSelected ? Brushes.Gold : isPotential || isReachableFromSelectedTarget ? Brushes.SlateGray : Brushes.DimGray;
+                var opacity = this.selectedTarget is null || isPotential || isReachableFromSelectedTarget || isSelectedBackwardRoute ? 1.0 : 0.22;
                 this.graph.Children.Add(new ShapePath {
                     Data = connection.Data,
                     Stroke = brush,
                     StrokeThickness = isSelected ? 4.0 : isPotential ? 2.0 : 1.5,
+                    StrokeDashArray = isReachableFromSelectedTarget ? new DoubleCollection([6.0, 4.0]) : null,
                     Opacity = opacity,
                     IsHitTestVisible = false,
                 });
@@ -358,7 +366,7 @@ namespace AndroidAppPreviewer {
                 return $"vertical:{first.Y}:{second.Y}";
             }
             var distance = Math.Abs(second.X - first.X);
-            return distance <= CardWidth + GraphHorizontalPadding * 1.5
+            return distance <= CardWidth + CardHorizontalSpacing * 1.5
                 ? $"direct:{pair.FirstPage}:{pair.SecondPage}"
                 : $"bypass:{first.Y}";
         }
@@ -379,7 +387,7 @@ namespace AndroidAppPreviewer {
                 ]);
             }
             var horizontalDistance = Math.Abs(secondCenter.X - firstCenter.X);
-            if (horizontalDistance <= CardWidth + GraphHorizontalPadding * 1.5) {
+            if (horizontalDistance <= CardWidth + CardHorizontalSpacing * 1.5) {
                 return this.CreateOrthogonalConnection([
                     new Point(first.X + CardWidth, first.Y + CardHeight * portOffset),
                     new Point(second.X, second.Y + CardHeight * portOffset),
@@ -409,6 +417,25 @@ namespace AndroidAppPreviewer {
 
         private bool IsPotentialRoute(PreviewRoute route) {
             return this.pathCandidates.Any(path => path.Any(item => item.Id == route.Id));
+        }
+
+        private bool IsReachableFromSelectedTarget(PreviewRoute route) {
+            return this.reachablePagesFromSelectedTarget.Contains(route.Source);
+        }
+
+        private IReadOnlySet<string> FindReachablePages(string source) {
+            // Обходим ориентированный граф: пунктир показывает все возможные действия после цели,
+            // а не только её непосредственные исходящие переходы.
+            var reachablePages = new HashSet<string>(StringComparer.Ordinal) { source };
+            var pagesToVisit = new Queue<string>([source]);
+            while (pagesToVisit.TryDequeue(out var page)) {
+                foreach (var route in this.routes.Where(route => route.Source == page)) {
+                    if (reachablePages.Add(route.Target)) {
+                        pagesToVisit.Enqueue(route.Target);
+                    }
+                }
+            }
+            return reachablePages;
         }
 
         private (string FirstPage, string SecondPage) GetOrderedEndpoints(PagePair pair, IReadOnlyDictionary<string, Point> positions) {
@@ -473,47 +500,39 @@ namespace AndroidAppPreviewer {
         }
 
         private void RenderBranchPanel() {
-            this.branchPanel.Children.Clear();
             if (this.selectedTarget is null) {
-                this.branchPanelScrollViewer.Visibility = Visibility.Collapsed;
+                this.navigationGraphControl.SetPathCandidates([]);
                 return;
             }
-            this.branchPanelScrollViewer.Visibility = Visibility.Visible;
-            for (var index = 0; index < this.pathCandidates.Count; ++index) {
-                var path = this.pathCandidates[index];
-                var isSelected = path.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id));
-                var content = new StackPanel();
-                content.Children.Add(new TextBlock {
-                    Text = $"Путь {index + 1}",
-                    FontWeight = FontWeights.SemiBold,
-                    Foreground = Brushes.White,
-                });
-                foreach (var route in path) {
-                    content.Children.Add(new TextBlock {
-                        Margin = new Thickness(0.0, 5.0, 0.0, 0.0),
-                        Text = $"{this.PageTitle(route.Source)}: {route.Title}",
-                        TextWrapping = TextWrapping.Wrap,
-                        Foreground = new SolidColorBrush(Color.FromRgb(218, 218, 218)),
-                    });
-                }
-                var card = new Border {
-                    Margin = new Thickness(0.0, 0.0, 0.0, 8.0),
-                    Padding = new Thickness(10.0),
-                    Background = new SolidColorBrush(isSelected ? Color.FromRgb(78, 65, 28) : Color.FromRgb(48, 48, 48)),
-                    BorderBrush = new SolidColorBrush(isSelected ? Colors.Gold : Color.FromRgb(92, 92, 92)),
-                    BorderThickness = new Thickness(isSelected ? 2.0 : 1.0),
-                    Child = content,
-                    Cursor = Cursors.Hand,
-                    ToolTip = "Выбрать этот сценарий маршрута",
-                };
-                card.MouseLeftButtonDown += (_, eventArgs) => {
-                    this.selectedPath = path;
-                    this.lastPathByTarget[this.selectedTarget] = path.Select(route => route.Id).ToArray();
-                    this.Render();
-                    eventArgs.Handled = true;
-                };
-                this.branchPanel.Children.Add(card);
+            var candidates = this.pathCandidates
+                .Select((path, index) => new PathCandidate(
+                    path,
+                    $"Путь {index + 1}",
+                    path.Select(route => $"{this.PageTitle(route.Source)}: {route.Title}").ToArray(),
+                    path.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id))))
+                .Cast<object>()
+                .ToArray();
+            this.navigationGraphControl.SetPathCandidates(candidates);
+        }
+
+        private void PathCandidatePressed(object candidate, int clickCount) {
+            if (candidate is not PathCandidate pathCandidate || this.selectedTarget is null) {
+                return;
             }
+            var isAlreadySelected = pathCandidate.Routes.Select(route => route.Id).SequenceEqual(this.selectedPath.Select(route => route.Id));
+            this.selectedPath = pathCandidate.Routes;
+            this.lastPathByTarget[this.selectedTarget] = this.selectedPath.Select(route => route.Id).ToArray();
+            if (clickCount == 2 && isAlreadySelected) {
+                this.ConfirmSelectedPath();
+                return;
+            }
+            this.Render();
+        }
+
+        private void ConfirmSelectedPath() {
+            var transitionIds = this.selectedPath.Select(route => route.Id).ToArray();
+            AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Logging.xp_log_info($"Preview graph confirmed transitions: {string.Join('>', transitionIds)}");
+            this.RouteConfirmed?.Invoke(transitionIds);
         }
 
         private void UpdateStatus() {
@@ -537,6 +556,12 @@ namespace AndroidAppPreviewer {
         private sealed record RouteSlot(int Index, int Count);
 
         private sealed record RoutedRoute(PreviewRoute Route, string LaneKey);
+
+        private sealed record PathCandidate(
+            IReadOnlyList<PreviewRoute> Routes,
+            string Title,
+            IReadOnlyList<string> Steps,
+            bool IsSelected);
 
         private sealed record PagePair(string FirstPage, string SecondPage) {
             public static PagePair Create(string sourcePage, string targetPage) {
