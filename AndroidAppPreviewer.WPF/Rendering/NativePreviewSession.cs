@@ -41,6 +41,7 @@ namespace AndroidAppPreviewer {
 
         public event Action<AndroidAppPreviewerPluginSDK.NativeInspectionResult>? ElementSelected;
         public event Action? RuntimeMarkupReloaded;
+        public event Action? InteractionCompleted;
 
         public NativePreviewSession(string resourcesDirectory, int width, int height) {
             this.renderer = new AnglePreviewRenderer(resourcesDirectory, width, height);
@@ -242,6 +243,7 @@ namespace AndroidAppPreviewer {
             this.hasPointerCapture = false;
             this.SetCursor(this.CursorKind(point));
             this.UpdateAndRender();
+            this.InteractionCompleted?.Invoke();
             eventArgs.Handled = true;
         }
 

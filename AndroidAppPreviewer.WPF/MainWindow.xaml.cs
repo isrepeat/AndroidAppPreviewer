@@ -71,6 +71,8 @@ namespace AndroidAppPreviewer {
         private EditorMode editorMode;
         private string? scenarioPath => this.scenarioController.Path;
         private string? scenarioFileText => this.scenarioController.PersistedText;
+        private string? activeScenarioPath;
+        private string? activeScenarioName;
 
         private bool IsNativePluginAvailable => this.pluginSessionController.IsAvailable;
         private bool IsPluginSelectionLocked => Array.Exists(
@@ -756,12 +758,18 @@ namespace AndroidAppPreviewer {
             if (this.updatingScenarioPicker) {
                 return;
             }
-            if (this.ScenarioPicker.SelectedItem is string name && name == MainWindow.NoScenarioName) {
+            if (this.ScenarioPicker.SelectedItem is not string name || name == MainWindow.NoScenarioName) {
+                this.activeScenarioPath = null;
+                this.activeScenarioName = null;
                 this.ResetNativeApplicationSession();
+            }
+            else {
+                this.activeScenarioPath = this.scenarioPath;
+                this.activeScenarioName = name;
             }
 
             this.ShowNativeApplicationPreview();
-            this.SaveScenarioToStorageButton.IsEnabled = this.nativeApplicationSession?.CanSavePreviewState() == true;
+            this.UpdateSaveScenarioToStorageButtonState();
         }
 
         private void SaveScenarioToStorageButtonClick(object sender, RoutedEventArgs eventArgs) {
@@ -773,11 +781,13 @@ namespace AndroidAppPreviewer {
             }
 
             this.nativeApplicationSession.SavePreviewState();
-            this.settings.SavedScenarioPath = this.scenarioPath;
-            this.settings.SavedScenarioName = name;
+            this.settings.SavedScenarioPath = null;
+            this.settings.SavedScenarioName = null;
+            this.activeScenarioPath = null;
+            this.activeScenarioName = null;
             this.SyncSettingsEditor();
             this.PersistSettings();
-            this.SaveScenarioToStorageButton.IsEnabled = false;
+            this.ScenarioPicker.SelectedItem = MainWindow.NoScenarioName;
         }
 
         private void EditorTextChanged(object sender, EventArgs eventArgs) {
@@ -927,6 +937,13 @@ namespace AndroidAppPreviewer {
                 this.SelectNavigationPageInEditor(this.deferredNavigationEditorPage);
                 this.deferredNavigationEditorPage = null;
             }
+        }
+
+        private void UpdateSaveScenarioToStorageButtonState() {
+            this.SaveScenarioToStorageButton.IsEnabled = this.scenarioPath is not null
+                && this.ScenarioPicker.SelectedItem is string name
+                && name != MainWindow.NoScenarioName
+                && this.nativeApplicationSession?.CanSavePreviewState() == true;
         }
 
         private void LoadMarkup(string path) {
@@ -1411,7 +1428,13 @@ namespace AndroidAppPreviewer {
                     }
                     var scenarioPath = this.scenarioPath;
                     this.ScenarioPicker.ItemsSource = new[] { MainWindow.NoScenarioName }.Concat(names).ToArray();
-                    if (previousPath is not null
+                    if (scenarioPath is not null
+                        && this.activeScenarioPath is not null
+                        && MainWindow.PathsAreEqual(this.activeScenarioPath, scenarioPath)
+                        && this.activeScenarioName is not null
+                        && names.Contains(this.activeScenarioName)) {
+                        this.ScenarioPicker.SelectedItem = this.activeScenarioName;
+                    } else if (previousPath is not null
                         && MainWindow.PathsAreEqual(previousPath, this.scenarioPath!)
                         && previous is not null
                         && this.ScenarioPicker.Items.Contains(previous)) {
@@ -1484,6 +1507,7 @@ namespace AndroidAppPreviewer {
                     session.SetAnimationPlaybackRate(this.GetAnimationPlaybackRate());
                     session.ElementSelected += this.PreviewElementSelected;
                     session.RuntimeMarkupReloaded += this.SelectElementFromMarkupEditor;
+                    session.InteractionCompleted += this.UpdateSaveScenarioToStorageButtonState;
                     this.previewLayer.Children.Clear();
                     this.previewLayer.Children.Add(this.nativeApplicationSession.Surface);
                     this.ApplyElementInspectionHighlightSettings();
@@ -1535,6 +1559,7 @@ namespace AndroidAppPreviewer {
                 }
                 this.nativeApplicationSession.UpdateAndRender();
                 this.SynchronizeNavigationGraph(this.nativeApplicationSession);
+                this.UpdateSaveScenarioToStorageButtonState();
                 this.previewController.StartAnimation();
                 this.statusPresenter.Success($"Native app: {this.nativeApplicationSession.CurrentPage}");
             }
