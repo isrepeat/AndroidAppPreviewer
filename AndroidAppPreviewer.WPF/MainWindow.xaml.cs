@@ -446,6 +446,10 @@ namespace AndroidAppPreviewer {
             }
             this.RefreshScenarioNames();
             this.UpdateDocumentState();
+            // Собственное сохранение не изменяет текст редактора, поэтому
+            // FileSystemWatcher его намеренно игнорирует. Перезагружаем XAML
+            // напрямую, не ожидая внешнего изменения файла.
+            this.ScheduleRender();
             this.statusPresenter.Success($"Сохранено: {this.markupPath}");
         }
 
@@ -1616,7 +1620,8 @@ namespace AndroidAppPreviewer {
         private void ConfigureMouseWheelScrolling() {
             this.editorScrollController.Configure(
                 this.MarkupEditor,
-                this.SettingsEditor);
+                this.SettingsEditor,
+                this.ScenarioEditor);
         }
 
         private void ScheduleRender() {

@@ -62,13 +62,20 @@ namespace AndroidAppPreviewer {
                 state = new SmoothScrollState { ScrollViewer = scrollViewer };
                 this.states.Add(editor, state);
             }
-            var currentOffset = scrollViewer.VerticalOffset;
-            if (Math.Abs(currentOffset - state.LastAppliedVerticalOffset) > 0.5) {
+            // WPF применяет ScrollToVerticalOffset не синхронно с mouse-wheel
+            // событием. Пока анимация идёт, берём собственную последнюю позицию,
+            // иначе очередной wheel может прочитать старый VerticalOffset и
+            // случайно сбросить накопленную цель прокрутки.
+            var currentOffset = state.IsAnimating
+                ? state.LastAppliedVerticalOffset
+                : scrollViewer.VerticalOffset;
+            if (!state.IsAnimating && Math.Abs(currentOffset - state.LastAppliedVerticalOffset) > 0.5) {
                 state.TargetVerticalOffset = currentOffset;
             }
             var offset = steps * settings.MouseWheelLines * editor.TextArea.TextView.DefaultLineHeight;
             state.StartVerticalOffset = currentOffset;
-            state.TargetVerticalOffset = Math.Clamp(state.TargetVerticalOffset + (eventArgs.Delta > 0 ? -offset : offset), 0, scrollViewer.ScrollableHeight);
+            var targetOffset = state.IsAnimating ? state.TargetVerticalOffset : currentOffset;
+            state.TargetVerticalOffset = Math.Clamp(targetOffset + (eventArgs.Delta > 0 ? -offset : offset), 0, scrollViewer.ScrollableHeight);
             state.LastAppliedVerticalOffset = currentOffset;
             state.AnimationStartedAt = Stopwatch.GetTimestamp();
             state.AnimationDuration = TimeSpan.FromMilliseconds(Math.Clamp(settings.MouseWheelAnimationDurationMilliseconds, 50.0, 5000.0));
