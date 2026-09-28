@@ -34,7 +34,7 @@ namespace AndroidAppPreviewer {
             }
         }
 
-        private const string NoScenarioName = "None";
+        private const string NoScenarioName = "Storage";
         private const double SearchPanelOverlayHeight = 84.0;
         private readonly WorkspaceController workspaceController;
         private readonly EditorScrollController editorScrollController;

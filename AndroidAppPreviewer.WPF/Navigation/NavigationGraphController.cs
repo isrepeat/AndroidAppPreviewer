@@ -195,8 +195,14 @@ namespace AndroidAppPreviewer {
         private void Render() {
             this.graph.Children.Clear();
             this.nodes.Clear();
-            var pages = this.routes
-                .SelectMany(route => new[] { route.Source, route.Target })
+            // Страницы без переходов тоже являются вершинами графа: например,
+            // стартовое приложение с единственной MainPage.
+            var pages = this.pageTitles.Keys
+                .Concat(this.routes.SelectMany(route => new[] { route.Source, route.Target }))
+                .Append(this.currentPage)
+                .Append(this.layoutRootPage)
+                .Where(page => !string.IsNullOrWhiteSpace(page))
+                .Select(page => page!)
                 .Distinct()
                 .Order()
                 .ToArray();
