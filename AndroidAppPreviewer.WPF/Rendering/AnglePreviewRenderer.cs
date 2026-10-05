@@ -35,7 +35,7 @@ namespace AndroidAppPreviewer {
                 this.Height,
                 96,
                 96,
-                PixelFormats.Bgra32,
+                PixelFormats.Pbgra32,
                 null,
                 pixels,
                 stride);
@@ -53,7 +53,7 @@ namespace AndroidAppPreviewer {
                 pixels,
                 stride,
                 pixels.Length) != 0);
-            var bitmap = BitmapSource.Create(this.Width, this.Height, 96, 96, PixelFormats.Bgra32, null, pixels, stride);
+            var bitmap = BitmapSource.Create(this.Width, this.Height, 96, 96, PixelFormats.Pbgra32, null, pixels, stride);
             bitmap.Freeze();
             return bitmap;
         }

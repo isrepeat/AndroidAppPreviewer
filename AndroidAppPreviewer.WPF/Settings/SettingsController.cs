@@ -1,4 +1,4 @@
-﻿namespace AndroidAppPreviewer {
+namespace AndroidAppPreviewer {
     internal sealed class SettingsController {
         private PreviewerSettings settings = null!;
 

@@ -939,6 +939,15 @@ namespace AndroidAppPreviewer {
             }
         }
 
+        private void NativeApplicationInteractionCompleted() {
+            if (this.nativeApplicationSession is null) {
+                return;
+            }
+            this.SynchronizeNavigationGraph(this.nativeApplicationSession);
+            this.pluginSessionController.LogInfo(
+                $"Preview interaction completed: native='{this.nativeApplicationSession.CurrentPage}', graph='{this.navigationGraphController.CurrentPage}'.");
+            this.UpdateSaveScenarioToStorageButtonState();
+        }
         private void UpdateSaveScenarioToStorageButtonState() {
             this.SaveScenarioToStorageButton.IsEnabled = this.scenarioPath is not null
                 && this.ScenarioPicker.SelectedItem is string name
@@ -1507,7 +1516,7 @@ namespace AndroidAppPreviewer {
                     session.SetAnimationPlaybackRate(this.GetAnimationPlaybackRate());
                     session.ElementSelected += this.PreviewElementSelected;
                     session.RuntimeMarkupReloaded += this.SelectElementFromMarkupEditor;
-                    session.InteractionCompleted += this.UpdateSaveScenarioToStorageButtonState;
+                    session.InteractionCompleted += this.NativeApplicationInteractionCompleted;
                     this.previewLayer.Children.Clear();
                     this.previewLayer.Children.Add(this.nativeApplicationSession.Surface);
                     this.ApplyElementInspectionHighlightSettings();
@@ -1527,12 +1536,19 @@ namespace AndroidAppPreviewer {
                     }
                 }
                 if (this.pendingPreviewRoute is { Count: > 0 } route) {
+                    // SetGraph меняет PagePicker и может синхронно вызвать повторный preview.
+                    // Маршрут уже должен быть снят с очереди до этого вызова.
+                    this.pendingPreviewRoute = null;
                     this.pluginSessionController.LogInfo($"Preview graph dispatches native route: {string.Join('>', route)}");
                     this.nativeApplicationSession.NavigatePreviewRoute(route);
-                    this.pluginSessionController.LogInfo($"Preview graph native route completed: {this.nativeApplicationSession.CurrentPage}");
+                    targetPage = this.nativeApplicationSession.CurrentPage;
+                    shouldLoadTargetPage = false;
+                    this.pluginSessionController.LogInfo($"Preview graph native route completed: {targetPage}");
                     this.navigationGraphController.SetGraph(this.nativeApplicationSession.NavigationGraph);
                 }
-                this.pendingPreviewRoute = null;
+                else {
+                    this.pendingPreviewRoute = null;
+                }
                 var scenario = this.GetSelectedScenarioJson();
                 if (scenario is not null) {
                     this.nativeApplicationSession.ApplyPreviewScenario(targetPage, scenario);

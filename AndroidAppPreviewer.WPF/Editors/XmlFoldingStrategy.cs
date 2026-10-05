@@ -1,4 +1,4 @@
-﻿using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace AndroidAppPreviewer {

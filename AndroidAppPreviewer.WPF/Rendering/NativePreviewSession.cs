@@ -109,7 +109,9 @@ namespace AndroidAppPreviewer {
             if (this.markups.TryGetValue(sourcePath, out var previous) && previous == markup) {
                 return;
             }
+            App.LogNativeOperation($"Reload markup begins: page='{page}', source='{sourcePath}'.");
             AndroidAppPreviewerPluginSDK.NativeRuntime.ThrowIfFalse(AndroidAppPreviewerPluginSDK.NativeRuntime.Methods.Session.xp_session_reload_markup(this.session, page, markup, sourcePath) != 0);
+            App.LogNativeOperation($"Reload markup completed: page='{page}', source='{sourcePath}'.");
             if (Path.GetFileNameWithoutExtension(sourcePath) == page) {
                 this.markups.Clear();
             }

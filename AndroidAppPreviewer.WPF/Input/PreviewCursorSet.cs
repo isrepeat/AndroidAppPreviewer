@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
