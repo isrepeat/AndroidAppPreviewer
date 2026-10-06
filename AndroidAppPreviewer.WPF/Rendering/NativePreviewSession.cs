@@ -17,7 +17,7 @@ namespace AndroidAppPreviewer {
         string TargetKind,
         string BackwardOfTransitionId,
         string DataType,
-        JsonElement PreviewDefault);
+        JsonElement HasPreviewDefaultNavigationState);
 
     internal sealed record PreviewNavigationGraph(
         string CurrentPageId,
@@ -315,7 +315,7 @@ namespace AndroidAppPreviewer {
                         ? backwardOfTransitionId.GetString() ?? ""
                         : "",
                     transition.GetProperty("dataType").GetString() ?? "",
-                    transition.GetProperty("previewDefault").Clone()))
+                    transition.GetProperty("hasPreviewDefaultNavigationState").Clone()))
                 .ToArray();
             return new PreviewNavigationGraph(
                 root.GetProperty("currentPageId").GetString() ?? throw new InvalidDataException("Current page is required."),
