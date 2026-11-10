@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RestorePackagesPath>../!tools/packages</RestorePackagesPath>
+    <ProjectToolsManifest>$(MSBuildThisFileDirectory)../Components.json</ProjectToolsManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="UniversalDevKit.ProjectTools" Version="0.2.0" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -4,7 +4,6 @@ $ErrorActionPreference = 'Stop'
 $env:DOTNET_CLI_UI_LANGUAGE = 'en-US'
 $env:VSLANG = '1033'
 $root = Split-Path -Parent $PSScriptRoot
-& (Join-Path $root 'Projects/AndroidAppPreviewerPluginSdk/GenerateProjects.ps1') -Check
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $msbuild = @(& $vswhere -latest -products '*' -find MSBuild/Current/Bin/MSBuild.exe)[0]
 if (-not $msbuild) {
@@ -13,6 +12,8 @@ if (-not $msbuild) {
 if (-not $Source) {
     $Source = Join-Path $root '!artifacts/packages/feed'
 }
+& dotnet msbuild (Join-Path $root 'Projects/Generate.csproj') -restore -t:CheckComponentProjects "-p:RestoreAdditionalProjectSources=$Source" -nologo -v:minimal
+if ($LASTEXITCODE -ne 0) { throw 'ProjectTools check failed.' }
 $project = Join-Path $PSScriptRoot 'NativeProject/PluginSdkNativeConsumer.vcxproj'
 foreach ($configuration in @('Debug', 'Release')) {
     & $msbuild $project /restore /nologo /v:minimal /p:Platform=x64 "/p:Configuration=$configuration" "/p:RestoreAdditionalProjectSources=$Source"

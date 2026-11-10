@@ -8,7 +8,7 @@ Directory.Build.props задаёт общие каталоги обычных MS
 
 У приложения используется dotnet publish, а managed SDK подключается обычным ProjectReference. У SDK используется сборка managed DLL и поставка native-исходников. Files.json рядом с native SDK служит единым списком для CMakeLists.txt и component-sources адаптера.
 
-Тот же Files.json используется GenerateProjects.ps1 для генерации Shared.vcxitems и фильтров Visual Studio. Static.vcxproj импортирует Shared и собирает статическую библиотеку с CRT MDd/MD; его собственные настройки поддерживаются вручную. Dependencies.props генерируется из трёх зависимостей Delivery/NuGet/Delivery.json, поэтому версии локальной native-сборки и поставки SDK имеют один источник. Native-проекты в solution заменяют прежние виртуальные папки с исходниками.
+Components.json и Component.json задают общую генерацию ProjectTools: Shared, Static, Dynamic, фильтры и явный Files.json для CMake и упаковки. Маски файлов раскрываются при генерации. Проекты полностью генерируются; пользовательские настройки CRT MDd/MD, артефактов и ANGLE находятся в Build.props. Dependencies.props является поддерживаемым расширением с PackageReference; его версии согласуются с Delivery/NuGet/Delivery.json. Projects/Generate.csproj подключает готовый UniversalDevKit.ProjectTools; собственный скрипт генерации отсутствует. Solution обновляется через закреплённый SolutionInjector, который получает сам ProjectTools.
 
 Интеграция потребителя принадлежит Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/CMake. В пакет она попадает в cmake. Это отдельная роль от собственного CMakeLists.txt native-проекта.
 

@@ -5,7 +5,7 @@
 ## Структура
 
 - Projects/AndroidAppPreviewer.WPF — WPF-приложение и его .csproj.
-- Projects/AndroidAppPreviewerPluginSdk — native SDK; Files.json задаёт единый список C++ файлов для Shared-проекта MSBuild, CMake и поставки исходников. Static.vcxproj собирает настоящую статическую библиотеку из Shared.vcxitems.
+- Projects/AndroidAppPreviewerPluginSdk — native SDK; Component.json задаёт маски C++ файлов. ProjectTools формирует Shared, Static, Dynamic и Files.json для CMake и поставки исходников.
 - Projects/AndroidAppPreviewerPluginSdk.Managed — managed DLL и её .csproj.
 - Packages/Build.csproj — единственная точка выпуска, закреплённый PackageReference на UniversalDevKit.PackageTools и список пакетов.
 - Packages/Version.json — версия обоих пакетов продукта.
@@ -59,7 +59,7 @@ MSBuild.exe AndroidAppPreviewer.sln /restore /p:Configuration=Release /p:Platfor
 - AndroidAppPreviewerPluginSdk.Shared.vcxitems содержит общие исходники и заголовки с фильтрами Internal/Abi, Internal/Bridge, Internal/Rendering и Session.
 - AndroidAppPreviewerPluginSdk.Static.vcxproj импортирует Shared и собирает AndroidAppPreviewerPluginSdk.lib для Windows x64 Debug/Release с CRT MDd/MD.
 - AndroidAppPreviewerPluginSdk.Dependencies.props содержит точные PackageReference на XamlRuntime, OpenGLESRenderer и Diagnostic. Версии берутся из Delivery/NuGet/Delivery.json; исходники UDK не подключаются.
-- GenerateProjects.ps1 обновляет Shared, фильтры и Dependencies.props из Files.json и описания доставки. После изменения списка файлов или версий запустите ./Projects/AndroidAppPreviewerPluginSdk/GenerateProjects.ps1; параметр -Check проверяет актуальность без записи. Static.vcxproj поддерживается вручную.
+- Components.json описывает генерацию проектов. Запуск: dotnet msbuild Projects/Generate.csproj -restore -t:GenerateComponentProjects. Для проверки используйте -t:CheckComponentProjects. По умолчанию используется PowerShell 7; UniversalDevKit.ProjectTools 0.2.0 восстанавливается из настроенного NuGet feed. Для локального пакета добавьте -p:RestoreAdditionalProjectSources=C:/WORK/UniversalDevKit/!artifacts/projecttools-package/ProjectTools. Shared, Static, Dynamic, фильтры и Files.json генерируются полностью. SolutionInjector sync пересчитывает управляемые записи solution, конфигурации и Shared-ссылки; удаление варианта убирает его из solution, сохраняя файл проекта. Настройки сборки находятся в Build.props, ссылки на NuGet — в Dependencies.props; версии этого файла нужно согласовывать с Delivery/NuGet/Delivery.json. Новые .h/.cpp подхватываются масками Component.json при следующем запуске генератора.
 
 Tests/NativeProject.Tests.ps1 собирает потребителя через ProjectReference на статическую библиотеку и запускает проверку ABI в Debug/Release с очищенным PATH. Библиотеки Diagnostic и ANGLE доставляются из NuGet. Выпуск PluginSDK сохраняет прежнюю поставку native-исходников и managed DLL: локальная .lib не добавляется в NuGet автоматически.
 

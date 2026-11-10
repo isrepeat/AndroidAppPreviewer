@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 3,
+  "includes": ["Projects/AndroidAppPreviewerPluginSdk/Component.json"],
+  "generation": {
+    "msbuild": {
+      "solution": "AndroidAppPreviewer.sln",
+      "projectDirectory": "Projects/{name}",
+      "projectName": "{name}.{variant}",
+      "configurations": ["Debug", "Release"],
+      "platforms": ["x64"],
+      "solutionFolder": "Projects",
+      "props": ["Projects/AndroidAppPreviewerPluginSdk/Build.props"]
+    }
+  }
+}
