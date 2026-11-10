@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "adapter": "nuget",
+  "id": "UniversalDevKit.AndroidAppPreviewer",
+  "supportedPlatforms": ["Windows"],
+  "nuspec": "UniversalDevKit.AndroidAppPreviewer.nuspec",
+  "noWarn": ["NU5100"]
+}

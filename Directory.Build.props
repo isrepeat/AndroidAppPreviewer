@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Временный WPF-проект использует каталоги основного проекта. -->
+    <AndroidAppPreviewerArtifactProjectName Condition="'$(AndroidAppPreviewerArtifactProjectName)' == ''">$([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '_[^_]+_wpftmp$', ''))</AndroidAppPreviewerArtifactProjectName>
+    <__AndroidAppPreviewerProjectArtifacts>$(MSBuildThisFileDirectory)!artifacts/projects/Windows-x64/msbuild/$(AndroidAppPreviewerArtifactProjectName)/</__AndroidAppPreviewerProjectArtifacts>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(__AndroidAppPreviewerProjectArtifacts)bin/</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(__AndroidAppPreviewerProjectArtifacts)obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath)' == ''">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/bin/**;**/obj/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

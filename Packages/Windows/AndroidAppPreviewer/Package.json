@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "name": "AndroidAppPreviewer",
+  "versionSource": "../../Version.json",
+  "projects": {
+    "app": {
+      "adapter": "dotnet",
+      "project": "Projects/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.csproj",
+      "operation": "publish",
+      "configuration": "Release",
+      "runtime": "win-x64",
+      "selfContained": true
+    }
+  },
+  "contents": [
+    {
+      "project": "app",
+      "root": "output",
+      "destination": "tools/win-x64"
+    },
+    {
+      "source": ".",
+      "include": [
+        "LICENSE",
+        "Packages/Windows/AndroidAppPreviewer/README.md"
+      ],
+      "destination": ".",
+      "preserveHierarchy": false,
+      "rename": {
+        "LICENSE": "LICENSE.txt"
+      }
+    }
+  ],
+  "deliveries": {
+    "NuGet": "Delivery/NuGet/Delivery.json"
+  }
+}

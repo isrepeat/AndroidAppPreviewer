@@ -1,6 +1,7 @@
 .vs/
 bin/
 obj/
-\!VS_TMP/
 **/bin/
 **/obj/
+/!artifacts/
+/!tools/

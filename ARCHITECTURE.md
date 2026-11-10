@@ -1,14 +1,17 @@
-# AndroidAppPreviewer extraction plan
+# Архитектура AndroidAppPreviewer
 
-`AndroidAppPreviewer.PluginSDK` is the only native compile-time contract shared by a previewer and an application plugin. Its ABI is C, versioned by `xp_get_abi_version`, and all text is UTF-8 copied into caller-owned memory. `xp_get_plugin_info` identifies the application, declares the package-relative resource root, and provides absolute paths to the source XAML root, entry markup and controls directory.
+Исходники и проекты находятся вместе в Projects: AndroidAppPreviewer.WPF, AndroidAppPreviewerPluginSdk и AndroidAppPreviewerPluginSdk.Managed.
 
-`AndroidAppPreviewer.WPF` is the reusable desktop host. It loads a plugin selected with `--plugin <path>` or from `PreviewPluginPath` in `previewer.settings.json`. The application picker persists the path and restarts the host because Windows cannot safely unload a plugin while WPF still owns native resources.
+Directory.Build.props задаёт общие каталоги обычных MSBuild-сборок: !artifacts/projects/Windows-x64/msbuild/<имя-проекта>/bin и obj. Для служебного проекта выпуска используется имя PackageRelease. Рабочие каталоги PackageTools находятся отдельно в !artifacts/package-build/<пакет>/<проект>/. Локальные bin/obj и !VS_TMP для новых сборок не используются.
 
-`../MobileClock.PreviewPlugin` owns MobileClock headers, static libraries and `MOBILECLOCK_XAML_PREVIEWER`. Its build copies MobileClock resources beside the DLL as `Resources/`. The host obtains both package resources and the MobileClock source workspace solely from `xp_get_plugin_info`; it does not use saved editor paths as a fallback.
+Выпуск описан только в Packages. Build.csproj подключает UniversalDevKit.PackageTools 0.5.0 и перечисляет Package.json. Общая версия продукта — Packages/Version.json. В каждом Package.json локально определены проекты и contents с прямым выбором project/root/path либо source/include/rename; внешнего реестра нет.
 
-The final repositories are:
+У приложения используется dotnet publish, а managed SDK подключается обычным ProjectReference. У SDK используется сборка managed DLL и поставка native-исходников. Files.json рядом с native SDK служит единым списком для CMakeLists.txt и component-sources адаптера.
 
-- `AndroidAppPreviewer`: `AndroidAppPreviewer.WPF`, host-owned fonts and generic launch script.
-- `MobileClock`: `MobileClock.PreviewPlugin`, MobileClock-specific generation/build script and its plugin package dependencies.
+Тот же Files.json используется GenerateProjects.ps1 для генерации Shared.vcxitems и фильтров Visual Studio. Static.vcxproj импортирует Shared и собирает статическую библиотеку с CRT MDd/MD; его собственные настройки поддерживаются вручную. Dependencies.props генерируется из трёх зависимостей Delivery/NuGet/Delivery.json, поэтому версии локальной native-сборки и поставки SDK имеют один источник. Native-проекты в solution заменяют прежние виртуальные папки с исходниками.
 
-The host fonts are already owned by `AndroidAppPreviewer.WPF/Resources/Fonts`. A plugin package consists of its selected DLL and the resource directories declared by its metadata. The MobileClock launch wrapper builds its plugin and invokes the Previewer with `--plugin`.
+Интеграция потребителя принадлежит Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/CMake. В пакет она попадает в cmake. Это отдельная роль от собственного CMakeLists.txt native-проекта.
+
+Три прямые NuGet-зависимости SDK и их точные версии определены в Delivery/NuGet/Delivery.json. PackageTools формирует из них nuspec; та же JSON-информация поставляется CMake-мосту. UDK-библиотеки не объединяются и не копируются в PluginSDK.
+
+Tests/PluginSdkConsumer проверяет готовую поставку и восстановленные зависимости в Debug/Release. Tests/PreviewerSmoke проверяет ABI и поведение с прикладным плагином. C ABI xp_get_abi версии 1 и прежние NuGet ID сохранены.

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.22)
+project(PreviewSdkConsumer LANGUAGES CXX)
+include("${SDK_ROOT}/cmake/AndroidAppPreviewerPluginConfig.cmake")
+add_library(PreviewSdkConsumer SHARED Consumer.cpp)
+target_compile_features(PreviewSdkConsumer PRIVATE cxx_std_20)
+android_app_previewer_add_runtime(PreviewSdkConsumer)
