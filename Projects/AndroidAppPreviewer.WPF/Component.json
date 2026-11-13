@@ -1,0 +1,34 @@
+{
+  "name": "AndroidAppPreviewer.WPF",
+  "projects": [
+    {
+      "kind": "application",
+      "projectType": "wpf",
+      "msbuildGuid": "{3406152C-A0EF-4865-A700-1CF83B5817A8}",
+      "sources": [
+        "Projects/AndroidAppPreviewer.WPF/**/*.cs",
+        "Projects/AndroidAppPreviewer.WPF/**/*.xaml"
+      ],
+      "excludeSources": [
+        "Projects/AndroidAppPreviewer.WPF/bin/**",
+        "Projects/AndroidAppPreviewer.WPF/obj/**",
+        "Projects/AndroidAppPreviewer.WPF/**/*_wpftmp.cs"
+      ],
+      "filters": [
+        { "path": "Projects/AndroidAppPreviewer.WPF", "filter": "", "preserveTree": true }
+      ],
+      "msbuild": {
+        "properties": {
+          "AssemblyName": "AndroidAppPreviewer",
+          "TargetFramework": "net8.0-windows",
+          "ImplicitUsings": "enable",
+          "AllowUnsafeBlocks": "true",
+          "PlatformTarget": "x64"
+        }
+      },
+      "buildExtensions": {
+        "msbuildTargets": "Projects/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.targets"
+      }
+    }
+  ]
+}

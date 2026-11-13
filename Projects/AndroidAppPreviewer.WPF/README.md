@@ -1,3 +1,3 @@
 # AndroidAppPreviewer.WPF
 
-Актуальный WPF-хост AndroidAppPreviewer. Managed PluginSDK подключён из соседнего проекта, исходники приложения принадлежат этому репозиторию. Сборка: `dotnet build Projects/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.csproj -c Release`. Выпуск NuGet выполняется Packages/Build.csproj через UniversalDevKit.PackageTools. Подробности — в README.md репозитория.
+WPF-хост AndroidAppPreviewer. `Component.json` описывает генерацию проекта, а `AndroidAppPreviewer.WPF.targets` подключает managed SDK, AvalonEdit и ресурсы. Команды генерации и выпуска находятся в корневом README.md.

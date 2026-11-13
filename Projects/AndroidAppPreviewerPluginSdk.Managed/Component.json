@@ -1,0 +1,20 @@
+{
+  "name": "AndroidAppPreviewerPluginSdk.Managed",
+  "projects": [
+    {
+      "kind": "library",
+      "projectType": "classLibrary",
+      "msbuildGuid": "{8FCB661C-DF12-4466-9D58-8F159EED456D}",
+      "sources": ["Projects/AndroidAppPreviewerPluginSdk.Managed/NativeRuntime.cs"],
+      "msbuild": {
+        "properties": {
+          "TargetFramework": "net8.0",
+          "AssemblyName": "AndroidAppPreviewer.PluginSDK",
+          "AllowUnsafeBlocks": "true",
+          "Nullable": "enable",
+          "ImplicitUsings": "enable"
+        }
+      }
+    }
+  ]
+}

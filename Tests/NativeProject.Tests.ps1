@@ -12,7 +12,12 @@ if (-not $msbuild) {
 if (-not $Source) {
     $Source = Join-Path $root '!artifacts/packages/feed'
 }
-& dotnet msbuild (Join-Path $root 'Projects/Generate.csproj') -restore -t:CheckComponentProjects "-p:RestoreAdditionalProjectSources=$Source" -nologo -v:minimal
+Push-Location -LiteralPath $root
+try {
+    & udk project check
+} finally {
+    Pop-Location
+}
 if ($LASTEXITCODE -ne 0) { throw 'ProjectTools check failed.' }
 $project = Join-Path $PSScriptRoot 'NativeProject/PluginSdkNativeConsumer.vcxproj'
 foreach ($configuration in @('Debug', 'Release')) {

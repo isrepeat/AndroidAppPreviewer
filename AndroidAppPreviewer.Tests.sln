@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.0.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{96C1138A-D123-4258-3EC0-4D0EA8822ADA}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\PackageRelease.Tests.ps1 = Tests\PackageRelease.Tests.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NativeProject", "NativeProject", "{A677941A-AFBD-47C8-843A-B860B3D98FC1}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\NativeProject\Consumer.cpp = Tests\NativeProject\Consumer.cpp
+		Tests\NativeProject.Tests.ps1 = Tests\NativeProject.Tests.ps1
+		Tests\NativeProject\PluginSdkNativeConsumer.vcxproj = Tests\NativeProject\PluginSdkNativeConsumer.vcxproj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PluginSdkConsumer", "PluginSdkConsumer", "{672F63DC-0A5F-AC82-7157-080FF64673D8}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\PluginSdkConsumer\CMakeLists.txt = Tests\PluginSdkConsumer\CMakeLists.txt
+		Tests\PluginSdkConsumer\Consumer.cpp = Tests\PluginSdkConsumer\Consumer.cpp
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PreviewerSmoke", "PreviewerSmoke", "{EE189566-66BF-8359-980A-DA20FC1EA4B6}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\PreviewerSmoke\CMakeLists.txt = Tests\PreviewerSmoke\CMakeLists.txt
+		Tests\PreviewerSmoke\PreviewerSmoke.cpp = Tests\PreviewerSmoke\PreviewerSmoke.cpp
+		Tests\PreviewerSmoke\README.md = Tests\PreviewerSmoke\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A677941A-AFBD-47C8-843A-B860B3D98FC1} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
+		{672F63DC-0A5F-AC82-7157-080FF64673D8} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
+		{EE189566-66BF-8359-980A-DA20FC1EA4B6} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
+	EndGlobalSection
+EndGlobal

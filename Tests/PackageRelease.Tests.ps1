@@ -1,4 +1,4 @@
-param([string]$CMake, [string]$Source)
+param([string]$CMake, [string]$Source, [string]$NuGet)
 $ErrorActionPreference = 'Stop'
 $env:DOTNET_CLI_UI_LANGUAGE = 'en-US'
 $env:VSLANG = '1033'
@@ -7,17 +7,13 @@ $env:VSLANG = '1033'
 $OutputEncoding = [Text.UTF8Encoding]::new($false)
 $root = Split-Path -Parent $PSScriptRoot
 $version = (Get-Content (Join-Path $root 'Packages/Version.json') -Raw | ConvertFrom-Json).version
-$toolsVersion = [xml](Get-Content (Join-Path $root 'Packages/Build.csproj') -Raw)
-$toolVersion = ($toolsVersion.Project.ItemGroup.PackageReference | Where-Object Include -eq 'UniversalDevKit.PackageTools').Version
-$tool = Join-Path $root "!tools/packages/universaldevkit.packagetools/$toolVersion/tools/Private/ArtifactDirectories.ps1"
-if (-not (Test-Path -LiteralPath $tool)) { throw 'Restore PackageTools and release both packages first.' }
-. $tool
 foreach ($output in @('AndroidAppPreviewer/app/output/AndroidAppPreviewer.exe', 'AndroidAppPreviewerPluginSdk/managed/output/AndroidAppPreviewer.PluginSDK.dll', 'AndroidAppPreviewerPluginSdk/native/output/cmake/AndroidAppPreviewerPluginSdk.json')) {
     if (-not (Test-Path -LiteralPath (Join-Path $root ('!artifacts/package-build/' + $output)) -PathType Leaf)) {
         throw "Missing PackageTools project output: $output"
     }
 }
-$run = Reset-UdkArtifactDirectory -Root (Join-Path $root '!artifacts/tests') -Path (Join-Path $root '!artifacts/tests/PackageRelease')
+$run = Join-Path $root ('!artifacts/tests/PackageRelease/' + [Guid]::NewGuid().ToString('N'))
+[void][IO.Directory]::CreateDirectory($run)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 function Extract-TestPackage([string]$Name, [string]$Id, [string[]]$Required) {
     $archivePath = Join-Path $root "!artifacts/packages/nuget/$Name/$Id.$version.nupkg"
@@ -44,7 +40,12 @@ foreach ($dependency in $expected.dependencies) {
     if ($actual.Count -ne 1 -or $actual[0].version -cne ('[' + $dependency.version + ']')) { throw "Wrong NuGet dependency: $($dependency.id)" }
 }
 if ($nuspec.OuterXml.Contains('WindowsRuntime')) { throw 'Obsolete runtime dependency remains.' }
-$nuget = & (Join-Path $root "!tools/packages/universaldevkit.packagetools/$toolVersion/tools/Private/GetNuGet.ps1") -CacheDirectory (Join-Path $root '!tools')
+if (-not $NuGet) {
+    $NuGet = Get-ChildItem -Path (Join-Path $root '!tools/NuGet/*/nuget.exe') -File |
+        Sort-Object { [version]$_.Directory.Name } -Descending |
+        Select-Object -First 1 -ExpandProperty FullName
+    if (-not $NuGet) { throw 'Build the packages with udk package build or pass -NuGet.' }
+}
 if (-not $Source) { $Source = Join-Path $root '!artifacts/packages/feed' }
 $feed = Join-Path $run 'feed'
 [void][IO.Directory]::CreateDirectory($feed)

@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Repository", "!Repository"
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		ARCHITECTURE.md = ARCHITECTURE.md
+		Components.json = Components.json
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config
@@ -16,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Repository", "!Repository"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Packages", "Packages", "{F5F8B21E-F561-AA00-B06E-D842494D1780}"
 	ProjectSection(SolutionItems) = preProject
-		Packages\Build.csproj = Packages\Build.csproj
 		Packages\Version.json = Packages\Version.json
 	EndProjectSection
 EndProject
@@ -56,67 +56,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{21B4A7CE
 		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projects", "Projects", "{C306EBC3-8D85-4B90-B46B-E275A307CA2D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AndroidAppPreviewerPluginSdk", "AndroidAppPreviewerPluginSdk", "{9A6F2355-8585-6738-E43B-D86CCC8E8427}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AndroidAppPreviewerPluginSdk.Dynamic", "Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Dynamic.vcxproj", "{88720BCA-BF59-71DC-A8BB-443676BE4C2A}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AndroidAppPreviewerPluginSdk.Static", "Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj", "{A379620B-CE14-48CB-A9C6-026FEA417B77}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AndroidAppPreviewerPluginSdk.Shared", "Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Shared.vcxitems", "{EE5E5C89-064F-2626-8262-C411FFA6BCF3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidAppPreviewer.WPF", "Projects\AndroidAppPreviewer.WPF\AndroidAppPreviewer.WPF.csproj", "{3406152C-A0EF-4865-A700-1CF83B5817A8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidAppPreviewerPluginSdk.Managed", "Projects\AndroidAppPreviewerPluginSdk.Managed\AndroidAppPreviewerPluginSdk.Managed.csproj", "{8FCB661C-DF12-4466-9D58-8F159EED456D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{96C1138A-D123-4258-3EC0-4D0EA8822ADA}"
-	ProjectSection(SolutionItems) = preProject
-		Tests\PackageRelease.Tests.ps1 = Tests\PackageRelease.Tests.ps1
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NativeProject", "NativeProject", "{A677941A-AFBD-47C8-843A-B860B3D98FC1}"
-	ProjectSection(SolutionItems) = preProject
-		Tests\NativeProject\Consumer.cpp = Tests\NativeProject\Consumer.cpp
-		Tests\NativeProject.Tests.ps1 = Tests\NativeProject.Tests.ps1
-		Tests\NativeProject\PluginSdkNativeConsumer.vcxproj = Tests\NativeProject\PluginSdkNativeConsumer.vcxproj
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PluginSdkConsumer", "PluginSdkConsumer", "{672F63DC-0A5F-AC82-7157-080FF64673D8}"
-	ProjectSection(SolutionItems) = preProject
-		Tests\PluginSdkConsumer\CMakeLists.txt = Tests\PluginSdkConsumer\CMakeLists.txt
-		Tests\PluginSdkConsumer\Consumer.cpp = Tests\PluginSdkConsumer\Consumer.cpp
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PreviewerSmoke", "PreviewerSmoke", "{EE189566-66BF-8359-980A-DA20FC1EA4B6}"
-	ProjectSection(SolutionItems) = preProject
-		Tests\PreviewerSmoke\CMakeLists.txt = Tests\PreviewerSmoke\CMakeLists.txt
-		Tests\PreviewerSmoke\PreviewerSmoke.cpp = Tests\PreviewerSmoke\PreviewerSmoke.cpp
-		Tests\PreviewerSmoke\README.md = Tests\PreviewerSmoke\README.md
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A}.Debug|x64.ActiveCfg = Debug|x64
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A}.Debug|x64.Build.0 = Debug|x64
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A}.Release|x64.ActiveCfg = Release|x64
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A}.Release|x64.Build.0 = Release|x64
-		{A379620B-CE14-48CB-A9C6-026FEA417B77}.Debug|x64.ActiveCfg = Debug|x64
-		{A379620B-CE14-48CB-A9C6-026FEA417B77}.Debug|x64.Build.0 = Debug|x64
-		{A379620B-CE14-48CB-A9C6-026FEA417B77}.Release|x64.ActiveCfg = Release|x64
-		{A379620B-CE14-48CB-A9C6-026FEA417B77}.Release|x64.Build.0 = Release|x64
-		{3406152C-A0EF-4865-A700-1CF83B5817A8}.Debug|x64.ActiveCfg = Debug|AnyCPU
-		{3406152C-A0EF-4865-A700-1CF83B5817A8}.Debug|x64.Build.0 = Debug|AnyCPU
-		{3406152C-A0EF-4865-A700-1CF83B5817A8}.Release|x64.ActiveCfg = Release|AnyCPU
-		{3406152C-A0EF-4865-A700-1CF83B5817A8}.Release|x64.Build.0 = Release|AnyCPU
-		{8FCB661C-DF12-4466-9D58-8F159EED456D}.Debug|x64.ActiveCfg = Debug|AnyCPU
-		{8FCB661C-DF12-4466-9D58-8F159EED456D}.Debug|x64.Build.0 = Debug|AnyCPU
-		{8FCB661C-DF12-4466-9D58-8F159EED456D}.Release|x64.ActiveCfg = Release|AnyCPU
-		{8FCB661C-DF12-4466-9D58-8F159EED456D}.Release|x64.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,26 +75,12 @@ Global
 		{14D3D18B-975D-8934-777D-7EAD2710D8A2} = {F4D864D2-A305-7DE4-3109-AFF88E788258}
 		{79617927-3428-2C54-8B1B-185DD5068C79} = {14D3D18B-975D-8934-777D-7EAD2710D8A2}
 		{21B4A7CE-D31A-380C-E5E8-525AA970C1B9} = {14D3D18B-975D-8934-777D-7EAD2710D8A2}
-		{9A6F2355-8585-6738-E43B-D86CCC8E8427} = {C306EBC3-8D85-4B90-B46B-E275A307CA2D}
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A} = {9A6F2355-8585-6738-E43B-D86CCC8E8427}
-		{A379620B-CE14-48CB-A9C6-026FEA417B77} = {9A6F2355-8585-6738-E43B-D86CCC8E8427}
-		{EE5E5C89-064F-2626-8262-C411FFA6BCF3} = {9A6F2355-8585-6738-E43B-D86CCC8E8427}
-		{3406152C-A0EF-4865-A700-1CF83B5817A8} = {C306EBC3-8D85-4B90-B46B-E275A307CA2D}
-		{8FCB661C-DF12-4466-9D58-8F159EED456D} = {C306EBC3-8D85-4B90-B46B-E275A307CA2D}
-		{A677941A-AFBD-47C8-843A-B860B3D98FC1} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
-		{672F63DC-0A5F-AC82-7157-080FF64673D8} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
-		{EE189566-66BF-8359-980A-DA20FC1EA4B6} = {96C1138A-D123-4258-3EC0-4D0EA8822ADA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {00000000-0000-0000-0000-000000000000}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Shared.vcxitems*{88720bca-bf59-71dc-a8bb-443676be4c2a}*SharedItemsImports = 4
-		Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Shared.vcxitems*{a379620b-ce14-48cb-a9c6-026fea417b77}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionInjectorProjectOwnership) = preSolution
-		{88720BCA-BF59-71DC-A8BB-443676BE4C2A} = ProjectTools|{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}|Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Dynamic.vcxproj
-		{A379620B-CE14-48CB-A9C6-026FEA417B77} = ProjectTools|{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}|Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj
-		{EE5E5C89-064F-2626-8262-C411FFA6BCF3} = ProjectTools|{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}|Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Shared.vcxitems
 	EndGlobalSection
 EndGlobal

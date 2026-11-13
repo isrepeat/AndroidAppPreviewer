@@ -18,7 +18,7 @@
     },
     "managed": {
       "adapter": "dotnet",
-      "project": "Projects/AndroidAppPreviewerPluginSdk.Managed/AndroidAppPreviewerPluginSdk.Managed.csproj",
+      "project": "Projects/AndroidAppPreviewerPluginSdk.Managed/UniversalDevKit.AndroidAppPreviewerPluginSdk.Managed.Net8.csproj",
       "operation": "build",
       "configuration": "Release"
     }

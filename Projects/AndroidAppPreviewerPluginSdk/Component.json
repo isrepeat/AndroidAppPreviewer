@@ -1,34 +1,63 @@
 {
   "name": "AndroidAppPreviewerPluginSdk",
-  "kind": "compiled",
-  "variants": ["static", "dynamic"],
-  "msbuildGuid": "{EE5E5C89-064F-2626-8262-C411FFA6BCF3}",
-  "headers": ["Projects/AndroidAppPreviewerPluginSdk/**/*.h"],
-  "sources": ["Projects/AndroidAppPreviewerPluginSdk/**/*.cpp"],
-  "requirements": { "cxxStandard": 20 },
-  "supportedPlatforms": ["Windows"],
-  "compile": {
-    "includeDirectories": ["Projects", "Projects/AndroidAppPreviewerPluginSdk"],
-    "preprocessorDefinitions": ["NOMINMAX", "WIN32_LEAN_AND_MEAN"],
-    "precompiledHeader": "notUsing"
-  },
-  "buildExtensions": {
-    "msbuildProps": "Projects/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Dependencies.props"
-  },
-  "msbuild": {
-    "resolvedFiles": "Projects/AndroidAppPreviewerPluginSdk/Files.json",
-    "properties": {
-      "EnableNativePackageReferenceSupport": "true",
-      "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\!tools\\packages\\",
-      "UniversalDevKitComponents": "XamlRuntime;OpenGLESRenderer;Diagnostic",
-      "UniversalDevKitRuntime": "Dynamic",
-      "UniversalDevKitXamlRuntimeLinkage": "Static",
-      "UniversalDevKitOpenGLESRendererLinkage": "Static",
-      "UniversalDevKitDiagnosticLinkage": "Dynamic"
-    },
-    "dynamicDefinitions": [
-      "UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_DYNAMIC",
-      "UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_EXPORTS"
-    ]
-  }
+  "projects": [
+    {
+      "kind": "library",
+      "projectType": "native",
+      "variants": [
+        "static",
+        "dynamic"
+      ],
+      "msbuildGuid": "{EE5E5C89-064F-2626-8262-C411FFA6BCF3}",
+      "headers": [
+        "Projects/AndroidAppPreviewerPluginSdk/**/*.h"
+      ],
+      "sources": [
+        "Projects/AndroidAppPreviewerPluginSdk/**/*.cpp"
+      ],
+      "requirements": {
+        "cxxStandard": 20
+      },
+      "supportedPlatforms": [
+        "Windows"
+      ],
+      "compile": {
+        "includeDirectories": [
+          "Projects",
+          "Projects/AndroidAppPreviewerPluginSdk"
+        ],
+        "preprocessorDefinitions": [
+          "NOMINMAX",
+          "WIN32_LEAN_AND_MEAN"
+        ],
+        "precompiledHeader": "notUsing"
+      },
+      "buildExtensions": {
+        "msbuildProps": "Projects/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Dependencies.props"
+      },
+      "msbuild": {
+        "resolvedFiles": "Projects/AndroidAppPreviewerPluginSdk/Files.json",
+        "properties": {
+          "EnableNativePackageReferenceSupport": "true",
+          "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\!tools\\packages\\",
+          "UniversalDevKitComponents": "XamlRuntime;OpenGLESRenderer;Diagnostic",
+          "UniversalDevKitRuntime": "Dynamic",
+          "UniversalDevKitXamlRuntimeLinkage": "Static",
+          "UniversalDevKitOpenGLESRendererLinkage": "Static",
+          "UniversalDevKitDiagnosticLinkage": "Dynamic"
+        },
+        "dynamicDefinitions": [
+          "UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_DYNAMIC",
+          "UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_EXPORTS"
+        ]
+      },
+      "filters": [
+        {
+          "path": "Projects/AndroidAppPreviewerPluginSdk",
+          "filter": "",
+          "preserveTree": true
+        }
+      ]
+    }
+  ]
 }
