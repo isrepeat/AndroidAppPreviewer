@@ -36,6 +36,9 @@
         "msbuildProps": "Sources/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Build.props"
       },
       "msbuild": {
+        "projectNames": {
+          "default": "{name}.{variant}"
+        },
         "properties": {
           "EnableNativePackageReferenceSupport": "true",
           "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\..\\..\\!tools\\packages\\",

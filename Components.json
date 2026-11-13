@@ -10,7 +10,9 @@
       "solution": "AndroidAppPreviewer.sln",
       "solutionFolder": "Projects/MsBuild/{kind}/{name}",
       "projectDirectory": "Projects/MsBuild/{kind}/{name}",
-      "projectName": "{name}.{variant}",
+      "projectNames": {
+        "default": "{name}"
+      },
       "configurations": ["Debug", "Release"],
       "platforms": ["x64"],
       "nativeProps": ["Projects/MsBuild/BuildLayout.props"]
