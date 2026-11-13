@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "name": "AndroidAppPreviewerPluginSdk",
-  "versionSource": "../../Version.json",
+  "version": "${PREVIEWER_VERSION.version}",
   "projects": {
     "native": {
-      "adapter": "component-sources",
-      "component": "Projects/AndroidAppPreviewerPluginSdk/Files.json",
+      "adapter": "udk-component-sources",
+      "component": "AndroidAppPreviewerPluginSdk",
       "sourceRoot": "Projects/AndroidAppPreviewerPluginSdk",
       "publicHeaders": [
         "*.h",
@@ -17,10 +17,8 @@
       "manifestDestination": "cmake/AndroidAppPreviewerPluginSdk.json"
     },
     "managed": {
-      "adapter": "dotnet",
-      "project": "Projects/AndroidAppPreviewerPluginSdk.Managed/UniversalDevKit.AndroidAppPreviewerPluginSdk.Managed.Net8.csproj",
-      "operation": "build",
-      "configuration": "Release"
+      "adapter": "udk-dotnet",
+      "component": "AndroidAppPreviewerPluginSdk.Managed"
     }
   },
   "contents": [

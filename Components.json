@@ -1,9 +1,9 @@
 {
   "schemaVersion": 5,
   "components": [
-    "Projects/AndroidAppPreviewer.WPF/Component.json",
-    "Projects/AndroidAppPreviewerPluginSdk/Component.json",
-    "Projects/AndroidAppPreviewerPluginSdk.Managed/Component.json"
+    "Projects/Components/Application/AndroidAppPreviewer.WPF.json",
+    "Projects/Components/Library/AndroidAppPreviewerPluginSdk.json",
+    "Projects/Components/Library/AndroidAppPreviewerPluginSdk.Managed.json"
   ],
   "generation": {
     "msbuild": {

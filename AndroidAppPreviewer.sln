@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Repository", "!Repository"
 		ARCHITECTURE.md = ARCHITECTURE.md
 		Components.json = Components.json
 		Directory.Build.props = Directory.Build.props
+		JsonReferences.json = JsonReferences.json
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config
 		README.md = README.md
@@ -56,6 +57,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{21B4A7CE
 		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projects", "Projects", "{DF3ECC46-09FD-1215-7823-B4DE7DCE95F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{24C43290-133D-4660-ABB1-95BE33AD44A7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{0397B6E8-A927-4C8E-9396-03BD0C655173}"
+	ProjectSection(SolutionItems) = preProject
+		Projects\Components\Application\AndroidAppPreviewer.WPF.json = Projects\Components\Application\AndroidAppPreviewer.WPF.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{0B53337B-699F-4808-A725-782AD3B41D5E}"
+	ProjectSection(SolutionItems) = preProject
+		Projects\Components\Library\AndroidAppPreviewerPluginSdk.json = Projects\Components\Library\AndroidAppPreviewerPluginSdk.json
+		Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json = Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -75,6 +91,9 @@ Global
 		{14D3D18B-975D-8934-777D-7EAD2710D8A2} = {F4D864D2-A305-7DE4-3109-AFF88E788258}
 		{79617927-3428-2C54-8B1B-185DD5068C79} = {14D3D18B-975D-8934-777D-7EAD2710D8A2}
 		{21B4A7CE-D31A-380C-E5E8-525AA970C1B9} = {14D3D18B-975D-8934-777D-7EAD2710D8A2}
+		{24C43290-133D-4660-ABB1-95BE33AD44A7} = {DF3ECC46-09FD-1215-7823-B4DE7DCE95F8}
+		{0397B6E8-A927-4C8E-9396-03BD0C655173} = {24C43290-133D-4660-ABB1-95BE33AD44A7}
+		{0B53337B-699F-4808-A725-782AD3B41D5E} = {24C43290-133D-4660-ABB1-95BE33AD44A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {00000000-0000-0000-0000-000000000000}

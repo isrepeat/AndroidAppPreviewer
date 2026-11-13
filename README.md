@@ -1,6 +1,6 @@
 # AndroidAppPreviewer
 
-Репозиторий WPF-приложения, native SDK и managed SDK. Корневой `Components.json` перечисляет три описания `Component.json` в каталоге `Projects`.
+Репозиторий WPF-приложения, native SDK и managed SDK. Корневой `Components.json` перечисляет три описания в `Projects/Components/Application` и `Projects/Components/Library`.
 
 ## Генерация проектов
 
@@ -23,7 +23,7 @@ udk package build Packages/Windows/AndroidAppPreviewer/Package.json
 udk package build Packages/Windows/AndroidAppPreviewerPluginSdk/Package.json
 ```
 
-Команда `udk package plan` принимает те же пути. Версия пакетов задаётся в `Packages/Version.json`, результаты находятся в `!artifacts/packages/nuget`. Пакет приложения содержит self-contained WPF для Windows x64. Пакет SDK содержит нативные исходники, managed DLL и CMake-интеграцию. Прямые зависимости SDK заданы в `Delivery/NuGet/Delivery.json`.
+Команда `udk package plan` принимает те же пути. Версия пакетов берётся из `Packages/Version.json` через `JsonReferences.json`, результаты находятся в `!artifacts/packages/nuget`. Манифесты пакетов выбирают проекты по именам компонентов из `Components.json`. Адаптер `udk-dotnet` использует сгенерированные проекты, а `udk-component-sources` получает список нативных исходников из описания компонента. Пакет приложения содержит self-contained WPF для Windows x64. Пакет SDK содержит нативные исходники, managed DLL и CMake-интеграцию. Прямые зависимости SDK заданы в `Delivery/NuGet/Delivery.json`.
 
 ## Тесты
 

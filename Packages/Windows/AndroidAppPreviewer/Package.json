@@ -1,13 +1,12 @@
 {
   "schemaVersion": 2,
   "name": "AndroidAppPreviewer",
-  "versionSource": "../../Version.json",
+  "version": "${PREVIEWER_VERSION.version}",
   "projects": {
     "app": {
-      "adapter": "dotnet",
-      "project": "Projects/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.csproj",
+      "adapter": "udk-dotnet",
+      "component": "AndroidAppPreviewer.WPF",
       "operation": "publish",
-      "configuration": "Release",
       "runtime": "win-x64",
       "selfContained": true
     }
