@@ -1,6 +1,6 @@
 # Архитектура AndroidAppPreviewer
 
-`Components.json` использует схему UDK v5. Описания в `Projects/Components` задают тип проекта, исходники и настройки генерации. Расширение WPF `AndroidAppPreviewer.WPF.targets` задаёт ресурсы, ссылку на managed SDK и зависимость от AvalonEdit. Нативный SDK подключает настройки MSBuild и PackageReference через `Build.props` и `AndroidAppPreviewerPluginSdk.Dependencies.props`.
+`Components.json` использует схему UDK v6. Описания в `Projects/Components` задают тип проекта, исходники и настройки генерации. Расширение WPF `AndroidAppPreviewer.WPF.targets` задаёт ресурсы, ссылку на managed SDK и зависимость от AvalonEdit. Общие настройки нативной сборки находятся в `Projects/MsBuild/BuildLayout.props`. Нативный SDK подключает имя выходного файла, заголовки ANGLE и зависимости NuGet через `AndroidAppPreviewerPluginSdk.Build.props`.
 
 `Directory.Build.props` задаёт каталоги MSBuild под `!artifacts/projects/Windows-x64/msbuild`. CMake и упаковщик SDK получают список исходников из описания нативного компонента.
 

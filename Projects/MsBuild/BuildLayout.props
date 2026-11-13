@@ -3,14 +3,12 @@
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
     <OutDir>$(__AndroidAppPreviewerProjectArtifacts)bin\$(Configuration)\</OutDir>
     <IntDir>$(__AndroidAppPreviewerProjectArtifacts)obj\$(Configuration)\</IntDir>
-    <TargetName>AndroidAppPreviewerPluginSdk</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
     <ClCompile>
       <RuntimeLibrary Condition="'$(Configuration)' == 'Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)' != 'Debug'">MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>$(PkgUniversalDevKit_OpenGLESRenderer)\include\ANGLE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>

@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../AndroidAppPreviewerPluginSdk.Managed/UniversalDevKit.AndroidAppPreviewerPluginSdk.Managed.Net8.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../Projects/MsBuild/Library/AndroidAppPreviewerPluginSdk.Managed/UniversalDevKit.AndroidAppPreviewerPluginSdk.Managed.Net8.csproj" />
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <Resource Include="Resources/Icons/*.svg" />
     <Content Include="Resources/Cursors/*.png" CopyToOutputDirectory="PreserveNewest" />

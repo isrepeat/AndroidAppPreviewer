@@ -72,6 +72,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{0B53
 		Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json = Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MsBuild", "MsBuild", "{1C2ACC07-4DF4-4F2B-B1F9-FE94CB7FBE0E}"
+	ProjectSection(SolutionItems) = preProject
+		Projects\MsBuild\BuildLayout.props = Projects\MsBuild\BuildLayout.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -94,6 +99,7 @@ Global
 		{24C43290-133D-4660-ABB1-95BE33AD44A7} = {DF3ECC46-09FD-1215-7823-B4DE7DCE95F8}
 		{0397B6E8-A927-4C8E-9396-03BD0C655173} = {24C43290-133D-4660-ABB1-95BE33AD44A7}
 		{0B53337B-699F-4808-A725-782AD3B41D5E} = {24C43290-133D-4660-ABB1-95BE33AD44A7}
+		{1C2ACC07-4DF4-4F2B-B1F9-FE94CB7FBE0E} = {DF3ECC46-09FD-1215-7823-B4DE7DCE95F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {00000000-0000-0000-0000-000000000000}

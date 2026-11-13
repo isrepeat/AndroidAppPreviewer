@@ -33,7 +33,7 @@
         "precompiledHeader": "notUsing"
       },
       "buildExtensions": {
-        "msbuildProps": "Sources/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Dependencies.props"
+        "msbuildProps": "Sources/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Build.props"
       },
       "msbuild": {
         "properties": {
