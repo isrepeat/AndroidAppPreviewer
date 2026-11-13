@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "components": [
     "Projects/Components/Application/AndroidAppPreviewer.WPF.json",
     "Projects/Components/Library/AndroidAppPreviewerPluginSdk.json",
@@ -8,7 +8,7 @@
   "generation": {
     "msbuild": {
       "solution": "AndroidAppPreviewer.sln",
-      "solutionFolder": "Projects",
+      "solutionFolder": "Projects/{kind}/{name}",
       "projectDirectory": "Sources/{name}",
       "projectName": "{name}.{variant}",
       "configurations": ["Debug", "Release"],
