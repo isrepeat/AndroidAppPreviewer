@@ -38,7 +38,7 @@
       "msbuild": {
         "properties": {
           "EnableNativePackageReferenceSupport": "true",
-          "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\!tools\\packages\\",
+          "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\..\\..\\!tools\\packages\\",
           "UniversalDevKitComponents": "XamlRuntime;OpenGLESRenderer;Diagnostic",
           "UniversalDevKitRuntime": "Dynamic",
           "UniversalDevKitXamlRuntimeLinkage": "Static",

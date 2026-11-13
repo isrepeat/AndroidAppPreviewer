@@ -13,7 +13,7 @@
       "projectName": "{name}.{variant}",
       "configurations": ["Debug", "Release"],
       "platforms": ["x64"],
-      "props": ["Projects/MsBuild/BuildLayout.props"]
+      "nativeProps": ["Projects/MsBuild/BuildLayout.props"]
     }
   }
 }

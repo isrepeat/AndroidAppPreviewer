@@ -41,7 +41,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Consumer.cpp" />
-    <ProjectReference Include="..\..\Sources\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj">
+    <ProjectReference Include="..\..\Projects\MsBuild\Library\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj">
       <Project>{CEE14A80-F14F-FD56-BFE6-A011BCA066A1}</Project>
     </ProjectReference>
   </ItemGroup>
