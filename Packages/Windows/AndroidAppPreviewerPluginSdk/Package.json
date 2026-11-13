@@ -6,12 +6,12 @@
     "native": {
       "adapter": "udk-component-sources",
       "component": "AndroidAppPreviewerPluginSdk",
-      "sourceRoot": "Projects/AndroidAppPreviewerPluginSdk",
+      "sourceRoot": "Sources/AndroidAppPreviewerPluginSdk",
       "publicHeaders": [
         "*.h",
         "Session/*.h"
       ],
-      "includeRoot": "Projects",
+      "includeRoot": "Sources",
       "headerDestination": "include",
       "sourceDestination": "src",
       "manifestDestination": "cmake/AndroidAppPreviewerPluginSdk.json"

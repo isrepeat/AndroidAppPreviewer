@@ -10,7 +10,7 @@
 udk project generate
 ```
 
-ProjectTools обновляет `AndroidAppPreviewer.sln` и создаёт проекты WPF и managed SDK, варианты Shared, Static и Dynamic нативного SDK, фильтры и `Files.json`. Для генерации из открытого решения выберите в Visual Studio **Tools → Regenerate UDK Solution**. Команда `udk project check` проверяет актуальность сгенерированных файлов.
+ProjectTools обновляет `AndroidAppPreviewer.sln` и создаёт проекты WPF и managed SDK, варианты Shared, Static и Dynamic нативного SDK, и фильтры. Для генерации из открытого решения выберите в Visual Studio **Tools → Regenerate UDK Solution**. Команда `udk project check` проверяет актуальность сгенерированных файлов.
 
 Для сборки решения нужен MSBuild из Visual Studio с компонентами C++ и .NET 8. Нативный SDK восстанавливает пакеты UDK через NuGet. Если они находятся в локальном feed, передайте MSBuild `/p:RestoreAdditionalProjectSources=<feed>`.
 

@@ -36,7 +36,7 @@ function(android_app_previewer_import_udk manifest packages_root)
         set(package_${component} "${root}")
     endforeach()
 
-    # Метаданные пакетов определяют имена библиотек; ABI.h проверяет CRT и компилятор.
+    # Package metadata specifies library names. ABI.h checks the CRT and compiler.
     add_library(AndroidAppPreviewerPlugin::UdkHeaders INTERFACE IMPORTED GLOBAL)
     set_property(TARGET AndroidAppPreviewerPlugin::UdkHeaders PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${package_Helpers}/include")
     foreach(component XamlRuntime OpenGLESRenderer Diagnostic)
@@ -100,7 +100,7 @@ function(android_app_previewer_import_udk manifest packages_root)
     set_property(TARGET UniversalDevKit::XamlRuntime.Static APPEND PROPERTY INTERFACE_LINK_LIBRARIES UniversalDevKit::Diagnostic.Dynamic)
     set_property(TARGET UniversalDevKit::OpenGLESRenderer.Static APPEND PROPERTY INTERFACE_LINK_LIBRARIES "UniversalDevKit::XamlRuntime.Static;UniversalDevKit::Diagnostic.Dynamic;UniversalDevKit::ANGLE")
 
-    # ANGLE входит в обычный пакет OpenGLESRenderer, включая публичные заголовки.
+    # The OpenGLESRenderer package includes ANGLE and its public headers.
     add_library(UniversalDevKit::ANGLE INTERFACE IMPORTED GLOBAL)
     set_property(TARGET UniversalDevKit::ANGLE PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${package_OpenGLESRenderer}/include/ANGLE")
     foreach(configuration Debug Release)

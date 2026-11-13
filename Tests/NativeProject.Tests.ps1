@@ -32,7 +32,7 @@ foreach ($configuration in @('Debug', 'Release')) {
             throw "Missing consumer runtime: $name"
         }
     }
-    # Запуск не должен зависеть от DLL в окружении разработчика.
+    # Run independently of DLLs in the developer's environment.
     $savedPath = $env:PATH
     try {
         $env:PATH = [Environment]::SystemDirectory

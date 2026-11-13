@@ -10,6 +10,6 @@ android_app_previewer_import_udk("${previewerRepositoryRoot}/Packages/Windows/An
 add_executable(PreviewerSmoke PreviewerSmoke.cpp)
 target_compile_features(PreviewerSmoke PRIVATE cxx_std_20)
 target_link_libraries(PreviewerSmoke PRIVATE AndroidAppPreviewerPlugin::UdkHeaders)
-target_include_directories(PreviewerSmoke PRIVATE "${previewerRepositoryRoot}/Projects")
+target_include_directories(PreviewerSmoke PRIVATE "${previewerRepositoryRoot}/Sources")
 target_compile_options(PreviewerSmoke PRIVATE /utf-8 /EHsc)
 target_compile_definitions(PreviewerSmoke PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)

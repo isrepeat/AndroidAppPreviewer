@@ -1,6 +1,6 @@
 # AndroidAppPreviewer Plugin SDK
 
-UniversalDevKit.AndroidAppPreviewer.PluginSDK содержит native-исходники из Projects/AndroidAppPreviewerPluginSdk, managed DLL и CMake-интеграцию. Native-библиотеки UDK в него не копируются.
+UniversalDevKit.AndroidAppPreviewer.PluginSDK содержит native-исходники из Sources/AndroidAppPreviewerPluginSdk, managed DLL и CMake-интеграцию. Native-библиотеки UDK в него не копируются.
 
 Прямые NuGet-зависимости — UniversalDevKit.XamlRuntime, UniversalDevKit.OpenGLESRenderer и UniversalDevKit.Diagnostic. Точные версии заданы в Delivery/NuGet/Delivery.json; Helpers восстанавливается транзитивно. ANGLE, его заголовки и лицензии поставляются обычным пакетом OpenGLESRenderer.
 

@@ -5,11 +5,3 @@ obj/
 **/obj/
 /!artifacts/
 /!tools/
-
-/Projects/AndroidAppPreviewer.WPF/*.csproj
-/Projects/AndroidAppPreviewerPluginSdk.Managed/*.csproj
-/Projects/AndroidAppPreviewerPluginSdk/*.vcxproj
-/Projects/AndroidAppPreviewerPluginSdk/*.vcxproj.filters
-/Projects/AndroidAppPreviewerPluginSdk/*.vcxitems
-/Projects/AndroidAppPreviewerPluginSdk/*.vcxitems.filters
-/Projects/AndroidAppPreviewerPluginSdk/Files.json

@@ -27,7 +27,7 @@
     <OutDir>$(MSBuildThisFileDirectory)..\..\!artifacts\tests\NativeProject\$(Configuration)\bin\</OutDir>
     <IntDir>$(MSBuildThisFileDirectory)..\..\!artifacts\tests\NativeProject\$(Configuration)\obj\</IntDir>
   </PropertyGroup>
-  <Import Project="..\..\Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Dependencies.props" />
+  <Import Project="..\..\Sources\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Dependencies.props" />
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\Projects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -41,7 +41,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Consumer.cpp" />
-    <ProjectReference Include="..\..\Projects\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj">
+    <ProjectReference Include="..\..\Sources\AndroidAppPreviewerPluginSdk\AndroidAppPreviewerPluginSdk.Static.vcxproj">
       <Project>{CEE14A80-F14F-FD56-BFE6-A011BCA066A1}</Project>
     </ProjectReference>
   </ItemGroup>

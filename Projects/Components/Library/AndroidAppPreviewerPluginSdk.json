@@ -10,10 +10,10 @@
       ],
       "msbuildGuid": "{EE5E5C89-064F-2626-8262-C411FFA6BCF3}",
       "headers": [
-        "Projects/AndroidAppPreviewerPluginSdk/**/*.h"
+        "Sources/AndroidAppPreviewerPluginSdk/**/*.h"
       ],
       "sources": [
-        "Projects/AndroidAppPreviewerPluginSdk/**/*.cpp"
+        "Sources/AndroidAppPreviewerPluginSdk/**/*.cpp"
       ],
       "requirements": {
         "cxxStandard": 20
@@ -23,8 +23,8 @@
       ],
       "compile": {
         "includeDirectories": [
-          "Projects",
-          "Projects/AndroidAppPreviewerPluginSdk"
+          "Sources",
+          "Sources/AndroidAppPreviewerPluginSdk"
         ],
         "preprocessorDefinitions": [
           "NOMINMAX",
@@ -33,10 +33,9 @@
         "precompiledHeader": "notUsing"
       },
       "buildExtensions": {
-        "msbuildProps": "Projects/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Dependencies.props"
+        "msbuildProps": "Sources/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Dependencies.props"
       },
       "msbuild": {
-        "resolvedFiles": "Projects/AndroidAppPreviewerPluginSdk/Files.json",
         "properties": {
           "EnableNativePackageReferenceSupport": "true",
           "RestorePackagesPath": "$(MSBuildThisFileDirectory)..\\..\\!tools\\packages\\",
@@ -53,7 +52,7 @@
       },
       "filters": [
         {
-          "path": "Projects/AndroidAppPreviewerPluginSdk",
+          "path": "Sources/AndroidAppPreviewerPluginSdk",
           "filter": "",
           "preserveTree": true
         }

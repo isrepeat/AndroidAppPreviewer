@@ -6,16 +6,16 @@
       "projectType": "wpf",
       "msbuildGuid": "{3406152C-A0EF-4865-A700-1CF83B5817A8}",
       "sources": [
-        "Projects/AndroidAppPreviewer.WPF/**/*.cs",
-        "Projects/AndroidAppPreviewer.WPF/**/*.xaml"
+        "Sources/AndroidAppPreviewer.WPF/**/*.cs",
+        "Sources/AndroidAppPreviewer.WPF/**/*.xaml"
       ],
       "excludeSources": [
-        "Projects/AndroidAppPreviewer.WPF/bin/**",
-        "Projects/AndroidAppPreviewer.WPF/obj/**",
-        "Projects/AndroidAppPreviewer.WPF/**/*_wpftmp.cs"
+        "Sources/AndroidAppPreviewer.WPF/bin/**",
+        "Sources/AndroidAppPreviewer.WPF/obj/**",
+        "Sources/AndroidAppPreviewer.WPF/**/*_wpftmp.cs"
       ],
       "filters": [
-        { "path": "Projects/AndroidAppPreviewer.WPF", "filter": "", "preserveTree": true }
+        { "path": "Sources/AndroidAppPreviewer.WPF", "filter": "", "preserveTree": true }
       ],
       "msbuild": {
         "properties": {
@@ -27,7 +27,7 @@
         }
       },
       "buildExtensions": {
-        "msbuildTargets": "Projects/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.targets"
+        "msbuildTargets": "Sources/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.targets"
       }
     }
   ]

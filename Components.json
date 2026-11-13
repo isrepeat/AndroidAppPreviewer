@@ -8,12 +8,12 @@
   "generation": {
     "msbuild": {
       "solution": "AndroidAppPreviewer.sln",
-      "projectDirectory": "Projects/{name}",
+      "solutionFolder": "Projects",
+      "projectDirectory": "Sources/{name}",
       "projectName": "{name}.{variant}",
       "configurations": ["Debug", "Release"],
       "platforms": ["x64"],
-      "solutionFolder": "Projects",
-      "props": ["Projects/AndroidAppPreviewerPluginSdk/Build.props"]
+      "props": ["Sources/AndroidAppPreviewerPluginSdk/Build.props"]
     }
   }
 }
