@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package schemaVersion="2"
+         name="AndroidAppPreviewer"
+         version="${PREVIEWER_VERSION.version}"
+         defaultDelivery="NuGet">
+  <Projects>
+    <Project id="app"
+             adapter="udk-dotnet"
+             component="AndroidAppPreviewer.WPF"
+             operation="publish"
+             runtime="win-x64"
+             selfContained="true" />
+  </Projects>
+  <Contents>
+    <Content project="app"
+             root="output"
+             destination="tools/win-x64" />
+    <Content source="."
+             destination="."
+             preserveHierarchy="false">
+      <Includes>
+        <Include>LICENSE</Include>
+        <Include>Packages/Windows/AndroidAppPreviewer/README.md</Include>
+      </Includes>
+      <Rename>
+        <File from="LICENSE">LICENSE.txt</File>
+      </Rename>
+    </Content>
+  </Contents>
+  <Deliveries>
+    <Delivery name="NuGet">Delivery/NuGet/Delivery.xml</Delivery>
+  </Deliveries>
+</Package>

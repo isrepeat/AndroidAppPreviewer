@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package schemaVersion="2"
+         name="AndroidAppPreviewerPluginSdk"
+         version="${PREVIEWER_VERSION.version}"
+         defaultDelivery="NuGet">
+  <Projects>
+    <Project id="native"
+             adapter="udk-component-sources"
+             component="AndroidAppPreviewerPluginSdk"
+             sourceRoot="Sources/AndroidAppPreviewerPluginSdk"
+             includeRoot="Sources"
+             headerDestination="include"
+             sourceDestination="src"
+             manifestDestination="cmake/AndroidAppPreviewerPluginSdk.json">
+      <PublicHeaders>
+        <Header>*.h</Header>
+        <Header>Session/*.h</Header>
+      </PublicHeaders>
+    </Project> <!-- Project id="native" -->
+    <Project id="managed"
+             adapter="udk-dotnet"
+             component="AndroidAppPreviewerPluginSdk.Managed" />
+  </Projects>
+  <Contents>
+    <Content project="native"
+             root="output"
+             destination="." />
+    <Content project="managed"
+             root="output"
+             path="AndroidAppPreviewer.PluginSDK.dll"
+             destination="lib/net8.0" />
+    <Content source="Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/CMake"
+             destination="cmake">
+      <Includes>
+        <Include>AndroidAppPreviewerPluginConfig.cmake</Include>
+        <Include>UdkNuGetDependencies.cmake</Include>
+        <Include>ReadUdkDependencies.ps1</Include>
+      </Includes>
+    </Content>
+    <Content source="Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/NuGet"
+             destination="cmake">
+      <Includes>
+        <Include>Delivery.xml</Include>
+      </Includes>
+      <Rename>
+        <File from="Delivery.xml">UdkDependencies.xml</File>
+      </Rename>
+    </Content>
+    <Content source="."
+             destination="."
+             preserveHierarchy="false">
+      <Includes>
+        <Include>LICENSE</Include>
+        <Include>Packages/Windows/AndroidAppPreviewerPluginSdk/README.md</Include>
+      </Includes>
+      <Rename>
+        <File from="LICENSE">LICENSE.txt</File>
+      </Rename>
+    </Content>
+  </Contents>
+  <Deliveries>
+    <Delivery name="NuGet">Delivery/NuGet/Delivery.xml</Delivery>
+  </Deliveries>
+</Package>

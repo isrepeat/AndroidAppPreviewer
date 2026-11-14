@@ -30,12 +30,13 @@ function Extract-TestPackage([string]$Name, [string]$Id, [string[]]$Required) {
     return $destination
 }
 $previewer = Extract-TestPackage 'AndroidAppPreviewer' 'UniversalDevKit.AndroidAppPreviewer' @('tools/win-x64/AndroidAppPreviewer.exe', 'tools/win-x64/AndroidAppPreviewer.PluginSDK.dll', 'LICENSE.txt', 'README.md')
-$sdk = Extract-TestPackage 'AndroidAppPreviewerPluginSdk' 'UniversalDevKit.AndroidAppPreviewer.PluginSDK' @('include/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPlugin.h', 'src/Internal/Abi/SessionAbi.cpp', 'lib/net8.0/AndroidAppPreviewer.PluginSDK.dll', 'cmake/AndroidAppPreviewerPluginConfig.cmake', 'cmake/UdkNuGetDependencies.cmake', 'cmake/UdkDependencies.json')
+$sdk = Extract-TestPackage 'AndroidAppPreviewerPluginSdk' 'UniversalDevKit.AndroidAppPreviewer.PluginSDK' @('include/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPlugin.h', 'src/Internal/Abi/SessionAbi.cpp', 'lib/net8.0/AndroidAppPreviewer.PluginSDK.dll', 'cmake/AndroidAppPreviewerPluginConfig.cmake', 'cmake/UdkNuGetDependencies.cmake', 'cmake/ReadUdkDependencies.ps1', 'cmake/UdkDependencies.xml')
 $nuspec = [xml](Get-Content (Join-Path $sdk 'UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec') -Raw)
 $declared = @($nuspec.package.metadata.dependencies.group.dependency)
-$expected = Get-Content (Join-Path $root 'Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/NuGet/Delivery.json') -Raw | ConvertFrom-Json
+$delivery = [xml](Get-Content (Join-Path $root 'Packages/Windows/AndroidAppPreviewerPluginSdk/Delivery/NuGet/Delivery.xml') -Raw)
+$expected = $delivery.SelectNodes('/Delivery/Dependencies/Dependency')
 if ($declared.Count -ne 3) { throw 'PluginSDK must declare three direct UDK dependencies.' }
-foreach ($dependency in $expected.dependencies) {
+foreach ($dependency in $expected) {
     $actual = @($declared | Where-Object id -eq $dependency.id)
     if ($actual.Count -ne 1 -or $actual[0].version -cne ('[' + $dependency.version + ']')) { throw "Wrong NuGet dependency: $($dependency.id)" }
 }
@@ -54,7 +55,7 @@ $packages = Join-Path $run 'packages'
 & $nuget install UniversalDevKit.AndroidAppPreviewer.PluginSDK -Version $version -Framework net8.0 -Source ($feed + ';' + $Source) -OutputDirectory $packages -NonInteractive -ForceEnglishOutput -NoCache
 if ($LASTEXITCODE -ne 0) { throw 'PluginSDK and its NuGet dependencies could not be restored.' }
 $sdk = Join-Path $packages "UniversalDevKit.AndroidAppPreviewer.PluginSDK.$version"
-foreach ($dependency in $expected.dependencies) {
+foreach ($dependency in $expected) {
     if (-not (Test-Path -LiteralPath (Join-Path $packages ($dependency.id + '.' + $dependency.version)))) { throw "Dependency was not restored: $($dependency.id)" }
 }
 if (-not $CMake) {

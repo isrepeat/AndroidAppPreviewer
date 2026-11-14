@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Component name="AndroidAppPreviewerPluginSdk">
+  <Projects>
+    <Project id="native"
+             kind="library"
+             projectType="native"
+             msbuildGuid="{EE5E5C89-064F-2626-8262-C411FFA6BCF3}">
+      <Variants>static;dynamic</Variants>
+      <Headers>
+        <Header>Sources/AndroidAppPreviewerPluginSdk/**/*.h</Header>
+      </Headers>
+      <Sources>
+        <Source>Sources/AndroidAppPreviewerPluginSdk/**/*.cpp</Source>
+      </Sources>
+      <Requirements>
+        <CxxStandard>20</CxxStandard>
+      </Requirements>
+      <SupportedPlatforms>Windows</SupportedPlatforms>
+      <Compile>
+        <IncludeDirectories>
+          <IncludeDirectory>Sources</IncludeDirectory>
+          <IncludeDirectory>Sources/AndroidAppPreviewerPluginSdk</IncludeDirectory>
+        </IncludeDirectories>
+        <PreprocessorDefinitions>NOMINMAX;WIN32_LEAN_AND_MEAN</PreprocessorDefinitions>
+        <PrecompiledHeader>notUsing</PrecompiledHeader>
+      </Compile>
+      <BuildExtensions>
+        <MSBuildProps>Sources/AndroidAppPreviewerPluginSdk/AndroidAppPreviewerPluginSdk.Build.props</MSBuildProps>
+      </BuildExtensions>
+      <MSBuild>
+        <Properties>
+          <EnableNativePackageReferenceSupport>true</EnableNativePackageReferenceSupport>
+          <RestorePackagesPath>$(MSBuildThisFileDirectory)..\..\..\..\!tools\packages\</RestorePackagesPath>
+          <UniversalDevKitComponents>XamlRuntime;OpenGLESRenderer;Diagnostic</UniversalDevKitComponents>
+          <UniversalDevKitRuntime>Dynamic</UniversalDevKitRuntime>
+          <UniversalDevKitXamlRuntimeLinkage>Static</UniversalDevKitXamlRuntimeLinkage>
+          <UniversalDevKitOpenGLESRendererLinkage>Static</UniversalDevKitOpenGLESRendererLinkage>
+          <UniversalDevKitDiagnosticLinkage>Dynamic</UniversalDevKitDiagnosticLinkage>
+        </Properties>
+        <DynamicDefinitions>UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_DYNAMIC;UNIVERSALDEVKIT_ANDROIDAPPPREVIEWERPLUGINSDK_EXPORTS</DynamicDefinitions>
+      </MSBuild>
+      <Filters>
+        <Filter filter=""
+                preserveTree="true">
+          <Path>Sources/AndroidAppPreviewerPluginSdk</Path>
+        </Filter>
+        <Filter filter="Build">
+          <Path>Sources/AndroidAppPreviewerPluginSdk/**/*.props</Path>
+          <Path>Sources/AndroidAppPreviewerPluginSdk/**/*.targets</Path>
+          <Path>{projectDirectory}/*.props</Path>
+        </Filter>
+      </Filters>
+    </Project> <!-- Project id="native" -->
+  </Projects>
+</Component>

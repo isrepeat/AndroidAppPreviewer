@@ -4,7 +4,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/UdkNuGetDependencies.cmake")
 if(NOT ANDROID_APP_PREVIEWER_UDK_PACKAGES_ROOT)
     get_filename_component(ANDROID_APP_PREVIEWER_UDK_PACKAGES_ROOT "${udkPreviewSdkRoot}/.." ABSOLUTE)
 endif()
-android_app_previewer_import_udk("${CMAKE_CURRENT_LIST_DIR}/UdkDependencies.json" "${ANDROID_APP_PREVIEWER_UDK_PACKAGES_ROOT}")
+android_app_previewer_import_udk("${CMAKE_CURRENT_LIST_DIR}/UdkDependencies.xml" "${ANDROID_APP_PREVIEWER_UDK_PACKAGES_ROOT}")
 add_library(AndroidAppPreviewerPlugin::SDK INTERFACE IMPORTED GLOBAL)
 set_target_properties(AndroidAppPreviewerPlugin::SDK PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${udkPreviewSdkRoot}/include"

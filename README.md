@@ -1,10 +1,10 @@
 # AndroidAppPreviewer
 
-Репозиторий WPF-приложения, native SDK и managed SDK. Корневой `Components.json` перечисляет три описания в `Projects/Components/Application` и `Projects/Components/Library`.
+Репозиторий WPF-приложения, native SDK и managed SDK. Корневой `Components.xml` перечисляет три описания в `Projects/Components/Application` и `Projects/Components/Library`.
 
 ## Генерация проектов
 
-Из корня репозитория с установленным UDK CLI выполните:
+Из корня репозитория с установленным UDK CLI с поддержкой XML-манифестов выполните:
 
 ```powershell
 udk project generate
@@ -19,11 +19,11 @@ ProjectTools обновляет `AndroidAppPreviewer.sln` и создаёт пр
 После генерации выполните из корня репозитория:
 
 ```powershell
-udk package build Packages/Windows/AndroidAppPreviewer/Package.json
-udk package build Packages/Windows/AndroidAppPreviewerPluginSdk/Package.json
+udk package build Packages/Windows/AndroidAppPreviewer/Package.xml
+udk package build Packages/Windows/AndroidAppPreviewerPluginSdk/Package.xml
 ```
 
-Команда `udk package plan` принимает те же пути. Версия пакетов берётся из `Packages/Version.json` через `JsonReferences.json`, результаты находятся в `!artifacts/packages/nuget`. Манифесты пакетов выбирают проекты по именам компонентов из `Components.json`. Адаптер `udk-dotnet` использует сгенерированные проекты, а `udk-component-sources` получает список нативных исходников из описания компонента. Пакет приложения содержит self-contained WPF для Windows x64. Пакет SDK содержит нативные исходники, managed DLL и CMake-интеграцию. Прямые зависимости SDK заданы в `Delivery/NuGet/Delivery.json`.
+Команда `udk package plan` принимает те же пути. Версия пакетов берётся из `Packages/Version.json` через `JsonReferences.json`, результаты находятся в `!artifacts/packages/nuget`. Манифесты пакетов выбирают проекты по именам компонентов из `Components.xml`. Адаптер `udk-dotnet` использует сгенерированные проекты, а `udk-component-sources` получает список нативных исходников из описания компонента. Пакет приложения содержит self-contained WPF для Windows x64. Пакет SDK содержит нативные исходники, managed DLL и CMake-интеграцию. Прямые зависимости SDK заданы в `Delivery/NuGet/Delivery.xml`.
 
 ## Тесты
 

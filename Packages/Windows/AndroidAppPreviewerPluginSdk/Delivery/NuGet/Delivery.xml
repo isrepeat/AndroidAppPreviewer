@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Delivery schemaVersion="1"
+          adapter="nuget"
+          id="UniversalDevKit.AndroidAppPreviewer.PluginSDK"
+          nuspec="UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec">
+  <SupportedPlatforms>Windows</SupportedPlatforms>
+  <NoWarn>NU5100;NU5128</NoWarn>
+  <Dependencies>
+    <Dependency id="UniversalDevKit.XamlRuntime"
+                version="0.1.0" />
+    <Dependency id="UniversalDevKit.OpenGLESRenderer"
+                version="0.1.0" />
+    <Dependency id="UniversalDevKit.Diagnostic"
+                version="0.1.0" />
+  </Dependencies>
+</Delivery>

@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Repository", "!Repository"
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		ARCHITECTURE.md = ARCHITECTURE.md
-		Components.json = Components.json
+		Components.xml = Components.xml
 		Directory.Build.props = Directory.Build.props
 		JsonReferences.json = JsonReferences.json
 		LICENSE = LICENSE
@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows", "Windows", "{2963
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AndroidAppPreviewer", "AndroidAppPreviewer", "{61EC760B-B32E-CFB2-0C37-7EF12232EE45}"
 	ProjectSection(SolutionItems) = preProject
-		Packages\Windows\AndroidAppPreviewer\Package.json = Packages\Windows\AndroidAppPreviewer\Package.json
+		Packages\Windows\AndroidAppPreviewer\Package.xml = Packages\Windows\AndroidAppPreviewer\Package.xml
 		Packages\Windows\AndroidAppPreviewer\README.md = Packages\Windows\AndroidAppPreviewer\README.md
 	EndProjectSection
 EndProject
@@ -33,13 +33,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Delivery", "Delivery", "{E2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{758F0B69-A360-1D0A-BA6E-0CA6D8BCC851}"
 	ProjectSection(SolutionItems) = preProject
-		Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\Delivery.json = Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\Delivery.json
+		Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\Delivery.xml = Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\Delivery.xml
 		Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.nuspec = Packages\Windows\AndroidAppPreviewer\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.nuspec
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AndroidAppPreviewerPluginSdk", "AndroidAppPreviewerPluginSdk", "{F4D864D2-A305-7DE4-3109-AFF88E788258}"
 	ProjectSection(SolutionItems) = preProject
-		Packages\Windows\AndroidAppPreviewerPluginSdk\Package.json = Packages\Windows\AndroidAppPreviewerPluginSdk\Package.json
+		Packages\Windows\AndroidAppPreviewerPluginSdk\Package.xml = Packages\Windows\AndroidAppPreviewerPluginSdk\Package.xml
 		Packages\Windows\AndroidAppPreviewerPluginSdk\README.md = Packages\Windows\AndroidAppPreviewerPluginSdk\README.md
 	EndProjectSection
 EndProject
@@ -48,12 +48,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CMake", "CMake", "{79617927-3428-2C54-8B1B-185DD5068C79}"
 	ProjectSection(SolutionItems) = preProject
 		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\AndroidAppPreviewerPluginConfig.cmake = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\AndroidAppPreviewerPluginConfig.cmake
+		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\ReadUdkDependencies.ps1 = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\ReadUdkDependencies.ps1
 		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\UdkNuGetDependencies.cmake = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\CMake\UdkNuGetDependencies.cmake
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{21B4A7CE-D31A-380C-E5E8-525AA970C1B9}"
 	ProjectSection(SolutionItems) = preProject
-		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\Delivery.json = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\Delivery.json
+		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\Delivery.xml = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\Delivery.xml
 		Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec = Packages\Windows\AndroidAppPreviewerPluginSdk\Delivery\NuGet\UniversalDevKit.AndroidAppPreviewer.PluginSDK.nuspec
 	EndProjectSection
 EndProject
@@ -63,13 +64,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{0397B6E8-A927-4C8E-9396-03BD0C655173}"
 	ProjectSection(SolutionItems) = preProject
-		Projects\Components\Application\AndroidAppPreviewer.WPF.json = Projects\Components\Application\AndroidAppPreviewer.WPF.json
+		Projects\Components\Application\AndroidAppPreviewer.WPF.xml = Projects\Components\Application\AndroidAppPreviewer.WPF.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{0B53337B-699F-4808-A725-782AD3B41D5E}"
 	ProjectSection(SolutionItems) = preProject
-		Projects\Components\Library\AndroidAppPreviewerPluginSdk.json = Projects\Components\Library\AndroidAppPreviewerPluginSdk.json
-		Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json = Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.json
+		Projects\Components\Library\AndroidAppPreviewerPluginSdk.xml = Projects\Components\Library\AndroidAppPreviewerPluginSdk.xml
+		Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.xml = Projects\Components\Library\AndroidAppPreviewerPluginSdk.Managed.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MsBuild", "MsBuild", "{1C2ACC07-4DF4-4F2B-B1F9-FE94CB7FBE0E}"

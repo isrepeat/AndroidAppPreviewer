@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Component name="AndroidAppPreviewer.WPF">
+  <Projects>
+    <Project id="wpf"
+             kind="application"
+             projectType="wpf"
+             msbuildGuid="{3406152C-A0EF-4865-A700-1CF83B5817A8}">
+      <Sources>
+        <Source>Sources/AndroidAppPreviewer.WPF/**/*.cs</Source>
+        <Source>Sources/AndroidAppPreviewer.WPF/**/*.xaml</Source>
+      </Sources>
+      <ExcludeSources>
+        <Source>Sources/AndroidAppPreviewer.WPF/bin/**</Source>
+        <Source>Sources/AndroidAppPreviewer.WPF/obj/**</Source>
+        <Source>Sources/AndroidAppPreviewer.WPF/**/*_wpftmp.cs</Source>
+      </ExcludeSources>
+      <Filters>
+        <Filter filter=""
+                preserveTree="true">
+          <Path>Sources/AndroidAppPreviewer.WPF</Path>
+        </Filter>
+        <Filter filter="Build">
+          <Path>Sources/AndroidAppPreviewer.WPF/**/*.props</Path>
+          <Path>Sources/AndroidAppPreviewer.WPF/**/*.targets</Path>
+        </Filter>
+      </Filters>
+      <MSBuild>
+        <Properties>
+          <AssemblyName>AndroidAppPreviewer</AssemblyName>
+          <TargetFramework>net8.0-windows</TargetFramework>
+          <ImplicitUsings>enable</ImplicitUsings>
+          <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+          <PlatformTarget>x64</PlatformTarget>
+        </Properties>
+      </MSBuild>
+      <BuildExtensions>
+        <MSBuildTargets>Sources/AndroidAppPreviewer.WPF/AndroidAppPreviewer.WPF.targets</MSBuildTargets>
+      </BuildExtensions>
+    </Project> <!-- Project id="wpf" -->
+  </Projects>
+</Component>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ComponentRegistry schemaVersion="6">
+  <Components>
+    <Component>Projects/Components/Application/AndroidAppPreviewer.WPF.xml</Component>
+    <Component>Projects/Components/Library/AndroidAppPreviewerPluginSdk.xml</Component>
+    <Component>Projects/Components/Library/AndroidAppPreviewerPluginSdk.Managed.xml</Component>
+  </Components>
+  <Generation>
+    <MSBuild>
+      <Solution>AndroidAppPreviewer.sln</Solution>
+      <SolutionFolder>
+        <Default>Projects/MsBuild/{kind:title}/{name}</Default>
+      </SolutionFolder>
+      <ProjectDirectory>
+        <Default>Projects/MsBuild/{kind:title}/{name}</Default>
+      </ProjectDirectory>
+      <ProjectName>
+        <When artifact="sharedItems">{name}.Shared</When>
+        <When artifact="project"
+              variant="static;dynamic">{name}.{variant:title}</When>
+        <When artifact="project"
+              projectType="classLibrary">{name}.{framework}</When>
+        <Default>{name}</Default>
+      </ProjectName>
+      <Configurations>Debug;Release</Configurations>
+      <Platforms>x64</Platforms>
+      <NativeProps>
+        <Prop>Projects/MsBuild/BuildLayout.props</Prop>
+      </NativeProps>
+    </MSBuild>
+  </Generation>
+</ComponentRegistry>

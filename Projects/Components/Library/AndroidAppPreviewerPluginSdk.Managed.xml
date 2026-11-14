@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Component name="AndroidAppPreviewerPluginSdk.Managed">
+  <Projects>
+    <Project id="dotnet"
+             kind="library"
+             projectType="classLibrary"
+             msbuildGuid="{8FCB661C-DF12-4466-9D58-8F159EED456D}">
+      <Sources>
+        <Source>Sources/AndroidAppPreviewerPluginSdk.Managed/NativeRuntime.cs</Source>
+      </Sources>
+      <MSBuild>
+        <Properties>
+          <TargetFramework>net8.0</TargetFramework>
+          <AssemblyName>AndroidAppPreviewer.PluginSDK</AssemblyName>
+          <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+          <Nullable>enable</Nullable>
+          <ImplicitUsings>enable</ImplicitUsings>
+        </Properties>
+      </MSBuild>
+    </Project> <!-- Project id="dotnet" -->
+  </Projects>
+</Component>

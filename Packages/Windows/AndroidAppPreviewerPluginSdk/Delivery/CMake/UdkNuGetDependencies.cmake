@@ -4,7 +4,19 @@ function(android_app_previewer_import_udk manifest packages_root)
     if(NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
         message(FATAL_ERROR "PluginSDK requires the Windows MSVC x64 UDK packages.")
     endif()
-    file(READ "${manifest}" delivery)
+    find_program(ANDROID_APP_PREVIEWER_POWERSHELL NAMES pwsh powershell REQUIRED)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${manifest}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ReadUdkDependencies.ps1")
+    execute_process(
+        COMMAND "${ANDROID_APP_PREVIEWER_POWERSHELL}" -NoProfile -ExecutionPolicy Bypass
+            -File "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ReadUdkDependencies.ps1" -Path "${manifest}"
+        OUTPUT_VARIABLE delivery
+        ERROR_VARIABLE error
+        RESULT_VARIABLE result
+        ENCODING UTF-8
+    )
+    if(NOT result STREQUAL "0")
+        message(FATAL_ERROR "Cannot read PluginSDK dependencies: ${error}")
+    endif()
     string(JSON count LENGTH "${delivery}" dependencies)
     math(EXPR last "${count} - 1")
     set(version "")
