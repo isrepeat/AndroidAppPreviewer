@@ -8,11 +8,18 @@
   "generation": {
     "msbuild": {
       "solution": "AndroidAppPreviewer.sln",
-      "solutionFolder": "Projects/MsBuild/{kind}/{name}",
-      "projectDirectory": "Projects/MsBuild/{kind}/{name}",
-      "projectNames": {
-        "default": "{name}"
-      },
+      "solutionFolder": [
+        { "template": "Projects/MsBuild/{kind:title}/{name}" }
+      ],
+      "projectDirectory": [
+        { "template": "Projects/MsBuild/{kind:title}/{name}" }
+      ],
+      "projectNames": [
+        { "when": { "artifact": "sharedItems" }, "template": "{name}.Shared" },
+        { "when": { "artifact": "project", "variant": ["static", "dynamic"] }, "template": "{name}.{variant:title}" },
+        { "when": { "artifact": "project", "projectType": "classLibrary" }, "template": "{name}.{framework}" },
+        { "template": "{name}" }
+      ],
       "configurations": ["Debug", "Release"],
       "platforms": ["x64"],
       "nativeProps": ["Projects/MsBuild/BuildLayout.props"]
